@@ -1,0 +1,11 @@
+export SSMDOMAINHOME=${HOME}/ECssm
+export SSMDOMAINHOME=$(true_path $SSMDOMAINHOME)
+export SSMUSERDOMAINHOME=$SSMDOMAINHOME
+export SSM_DOMAIN_HOME=$SSMDOMAINHOME
+if [ -r "${SSMDOMAINHOME}/etc/ssm.d/profile" ]; then
+   . "${SSMDOMAINHOME}/etc/ssm.d/profile"
+else
+   echo ERROR: cannot find ${SSMDOMAINHOME}/etc/ssm.d/profile
+   echo        SETUP will not be done properly
+fi
+echo === Acquiring Unified Environment ===

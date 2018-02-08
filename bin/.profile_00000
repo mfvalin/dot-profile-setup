@@ -1,0 +1,45 @@
+if [[ "$SETUP_DONE" != "1" ]]
+then
+
+  echo "=== Unified Environment .profile (preamble) ==="
+
+  export SETUP_KIND=001
+  . s.set_profile_hostbin.dot
+
+# update list of possible profile file names to help user
+  mkdir -p $HOME/.profile.d
+  s.profile_list
+
+# [[ -r $HOME/ECssm/multi/bin/.site_profile ]] && . $HOME/ECssm/multi/bin/.site_profile
+  ClAsS="pre"
+  for TeMp in $(r.choose_architecture ${HOME}/.profile.d/.${ClAsS}_profile)
+  do
+    s.echo -v 2 === sourcing $TeMp ===
+    . $TeMp
+  done
+
+  # set architecture
+  . s.set_ec_arch.dot
+
+  # set up HOST variables
+  . set_hosts.dot
+  . set_host_specific.dot
+
+  # set up TMPDIR and make sure bin and ovbin exist
+  . set_tmpdir.dot
+  mkdir -p $HOME/bin/$EC_ARCH $HOME/ovbin/$EC_ARCH
+
+  # set up session/job override directory for commands
+  test -d $TMPDIR/bin && export PATH=$TMPDIR/bin:$PATH
+
+  # get rid of old and dead TMPDIRs
+  r.clear_old_tmpdirs
+
+  # setup to clear TMPDIRs at exit
+  trap "r.cleanup_tmpdir" EXIT
+
+else
+
+  [[ -z "${ARMNLIB}${AFSISIO}" ]] && s.echo -v 5 "SETUP already done, will not redo"
+
+fi

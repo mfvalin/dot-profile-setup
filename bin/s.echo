@@ -1,0 +1,8 @@
+#!/bin/ksh
+verbosity=${SETUP_MSG:-0}
+msglevel=10
+if [[ "$1" = -v* ]] ; then
+  msglevel=${2:-10}
+  shift ; shift
+fi
+(( msglevel >= verbosity )) && echo "$@" 2>&1

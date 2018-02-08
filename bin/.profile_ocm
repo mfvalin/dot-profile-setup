@@ -1,0 +1,22 @@
+export FRONTEND=castor
+export BACKEND=maia
+
+export BANCO=/data/gridpt/banco
+export CUTOFF=/data/ade/cutoff
+export PLACARDBASE=/usr/local/env/afsisio/modeles/GEMDM
+## export PLACARDBASE=${CMC_OCMPATH}/datafiles/placards
+
+if [ "`uname -s`" = "AIX" ]; then
+    # we're on the backend
+    export CMCGRIDF=/fs/cmo/gridpt/dbase
+    export CMCGRIDF_remote=/data/gridpt/dbase
+    export WORKBASE=/fs/cmo/work/
+    export WORKBASE_remote=/data/cmcfi/work/
+    export LOGBASE=/fs/cmo/log
+else 
+   # we're on a frontend	
+   export CMCGRIDF=/data/gridpt/dbase
+   export CMCGRIDF_remote=/fs/cmo/gridpt/dbase
+   export WORKBASE=/data/cmcfi/work/
+   export WORKBASE_remote=/fs/cmo/work/
+fi

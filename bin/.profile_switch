@@ -1,0 +1,18 @@
+AnSwEr=n
+test -r ${HOME}/.profile.d/.AnSwEr_profile_switch && AnSwEr=`cat ${HOME}/.profile.d/.AnSwEr_profile_switch`
+chmod 644 ${HOME}/.profile.d/.AnSwEr_profile_switch
+printf "${AnSwEr:-n}" >${HOME}/.profile.d/.AnSwEr_profile_switch
+AnSwEr=${AnSwErD:-${AnSwEr:-n}}
+AnSwErD=${AnSwEr}
+if [[ ! -f ${HOME}/.profile_nodelay ]] ; then
+  printf "use alternate .profile ? y/n/name [${AnSwErD}]"
+  tty -s && test -r ${HOME}/.profile_alternate && AnSwEr=`bash -c 'read -t 3 aaa ; echo ${aaa}'`
+fi
+#echo AnSwEr=$AnSwEr
+test "$AnSwEr" = "" && AnSwEr=$AnSwErD
+test "$AnSwEr" = "y"  && AnSwEr=alternate
+test "$AnSwEr" = "n"  && AnSwEr=default
+touch ${HOME}/.profile_NoLogin
+test -r ${HOME}/.profile_${AnSwEr} || unset AnSwEr
+printf "\nUSING .profile_${AnSwEr:-default}\n"
+test -r ${HOME}/.profile_${AnSwEr:-default} && . ${HOME}/.profile_${AnSwEr:-default} 

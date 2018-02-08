@@ -1,0 +1,61 @@
+if [[ "$SETUP_DONE" != "1" ]]
+then
+#  [[ -n $BASH_VERSION ]] && [[ -r /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash ]] && source /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash
+  export ORDENV_PLAT=linux26-x86-64
+  [[ -n $BASH_VERSION ]] && [[ ! -f $HOME/.lmod ]] && \
+    [[ -r /unique/armnssm/MODULES/Modules-C/Modules/3.2.10/init/bash ]] && \
+    source /unique/armnssm/MODULES/Modules-C/Modules/3.2.10/init/bash
+  [[ -n $BASH_VERSION ]] && [[ -f $HOME/.lmod ]] && \
+    [[ -d /unique/armnssm/MODULES/Modules/3.2.10/modulefiles ]] && \
+    [[ -d /unique/armnssm/MODULES/Modules/6.1/modulefiles/Core ]] && \
+    export EXTRA_MODULES="/unique/armnssm/MODULES/Modules/3.2.10/modulefiles /unique/armnssm/MODULES/Modules/6.1/modulefiles/Core"
+  [[ -n $BASH_VERSION ]] && [[ -f $HOME/.lmod ]] && \
+    [[ -r /unique/armnssm/sw/ES6/Lmod/lmod/6.1/init/bash ]] && \
+    source /unique/armnssm/sw/ES6/Lmod/lmod/6.1/init/bash && module -v 
+  echo "=== Unified Environment .profile (postamble) ==="
+
+  # interactive and batch diverge here
+  unset InteractiveSession
+  [[ -n $DISPLAY && -z $SGE_O_HOME ]] && InteractiveSession=XWindows
+  tty -s && InteractiveSession="interactive ${InteractiveSession}"
+  if [[ -n ${InteractiveSession} ]]
+  then
+    s.echo -v 2 === ${InteractiveSession} session ===
+    tty -s && . set_interactive.dot
+    . set_XWindows.dot
+    ClAsSlIsT="group3 group2 group1 group0 group user ${TRUE_HOST} ${InteractiveSession}"
+  else
+    ulimit -s unlimited
+    s.echo -v 3 === THIS IS  A BATCH or SSH SESSION ===
+    if [[ "$BATCH_LIKE_INTERACTIVE" != "" ]]
+    then
+      ClAsSlIsT="group3 group2 group1 group0 group ${TRUE_HOST} user"
+    else
+      ClAsSlIsT="batch"
+    fi
+#    echo IMMEDIATE_MODE=$IMMEDIATE_MODE
+    if [[ -n "${SSH_CLIENT}" ]] ; then
+      test -z "$SGE_ACCOUNT" && test -z ${IMMEDIATE_MODE} && ClAsSlIsT=ssh
+    fi
+  fi
+  for ClAsS in ${ClAsSlIsT}
+  do
+    for TeMp in $(r.choose_architecture ${HOME}/.profile.d/.${ClAsS}_profile)
+    do
+      s.echo -v 2 === sourcing $TeMp ===
+      . $TeMp
+    done
+  done
+
+  # mark setup as done
+  export SETUP_DONE=1
+  unset ClAsS TeMp ClAsSlIsT
+  s.login_warnings
+  export ListingFile=${ListingFile:-${HOME}/listings/${TRUE_HOST}/interactive_$$}
+else
+
+  [[ -z "${ARMNLIB}${AFSISIO}" ]] && s.echo -v 5 "SETUP already done, will not redo"
+
+fi
+[[ -r ${HOME}/ECssm/MOTD ]] && cat ${HOME}/ECssm/MOTD
+[[ -x ${HOME}/ECssm/MOTD.sh ]] && ${HOME}/ECssm/MOTD.sh

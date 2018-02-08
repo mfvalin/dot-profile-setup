@@ -1,0 +1,10 @@
+#!/bin/ksh
+#set -x
+export UnIqUe=${TMPDIR}/`hostname`$$
+mkdir -p $UnIqUe
+if [[ ! -d $UnIqUe ]] ; then echo ERROR: soumet_lajob cannot create necessary temporary directory ; exit 1 ; fi
+cp ${1:-lajob.tar} $UnIqUe/lajob.tar
+ls -al $UnIqUe
+( cd $UnIqUe && tar xvof lajob.tar && ./GO )
+#sleep 5
+if [[  -d $UnIqUe ]] ; then rm -rf $UnIqUe ; fi

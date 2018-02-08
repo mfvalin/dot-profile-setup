@@ -1,0 +1,9 @@
+#!/bin/bash
+[[ "${EC_ARCH}" == "${NEW_EC_ARCH}" ]] && exit 0
+if [[ -n ${COMP_ARCH:-${EC_ARCH#${BASE_ARCH}}} ]] ; then
+  u.banner "=${1:-ERROR}="
+  echo "Compiler Architecture was already defined: '${COMP_ARCH:-${EC_ARCH#${BASE_ARCH}}}'"
+  u.banner '========='
+  [[ "${1:-ERROR}" == *ERROR* ]] && exit 1
+fi
+exit 0

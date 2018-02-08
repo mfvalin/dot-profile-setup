@@ -1,0 +1,5 @@
+[[ -z ${DirLibso} ]] && echo ERROR: environment variable DirLibso not defined && return
+[[ -z ${OLD_LD_LIBRARY_PATH} ]] && echo ERROR: OLD_LD_LIBRARY_PATH does not exist && return
+export LD_LIBRARY_PATH="${OLD_LD_LIBRARY_PATH}"
+unset OLD_LD_LIBRARY_PATH
+rm -f ${DirLibso}/*.so*

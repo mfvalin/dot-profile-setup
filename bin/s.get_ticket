@@ -1,0 +1,21 @@
+#!/bin/ksh
+[[ "$1" == -h || "$1" == --help ]] && cat <<true
+#s.get_ticket path_to_directory suffix
+true
+function error_exit
+{
+  echo "ERROR: $*" 1>&2
+  exit 1
+}
+if [[ -d ${1} && -n ${2} ]] ; then
+  cd ${1}
+  MyDir=$(hostname)_$$
+  mkdir ${MyDir} || error_exit cannot create directory ${1}/${MyDir}
+  for Target in *.${2}
+  do
+    mv ${Target} ${MyDir} && printf "${MyDir}/${Target}\n" && exit 0
+  done  2>/dev/null
+  exit 0
+else
+  error_exit "'${1}'" not a directory or suffix not supplied
+fi

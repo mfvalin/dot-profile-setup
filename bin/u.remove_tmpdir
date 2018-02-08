@@ -1,0 +1,12 @@
+#!/bin/bash
+[[ -n $TMPBASE ]] && \
+  [[ -n $ZZZPID ]] && \
+  [[ -d $TMPBASE/$ZZZPID ]] &&\
+  [[ "$TMPDIR" == "$TMPBASE/$ZZZPID" ]] &&\
+  /bin/rm -rf $TMPBASE/$ZZZPID &&\
+  echo removing  TMPDIR = $TMPBASE/$ZZZPID &&\
+  exit 0
+[[ -z $TMPBASE ]] && echo "ERROR: TMPBASE NOT defined"
+[[ -z $ZZZPID ]] && echo "ERROR: ZZZPID NOT defined"
+[[  -d $TMPBASE/$ZZZPID ]] || echo "ERROR: directory $TMPBASE/$ZZZPID NOT found"
+exit 1

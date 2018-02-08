@@ -1,0 +1,15 @@
+#!/bin/ksh
+#
+# get python version
+#
+if [[ "$1" = "major" ]]
+then
+ python -V 2>&1 | sed 's/.* //' | sed 's/[.][0-9]*$//'
+ exit 0
+fi
+if [[ "$1" = "full" ]]
+then
+ python -V 2>&1 | sed 's/.* //'
+ exit 0
+fi
+python -V 2>&1 | sed 's/.* //' | sed 's/[.]/ /g'

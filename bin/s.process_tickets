@@ -1,0 +1,31 @@
+#!/bin/ksh
+[[ "$1" == -h || "$1" == --help ]] && cat <<true
+# s.process_tickets [-n max_number] Path_to_directory Suffix Script_to_run Script_to_be_sourced
+# arguments are positional
+true
+#
+function error_exit
+{
+  echo "ERROR: $*" 1>&2
+  exit 1
+}
+MaxTickets=10000
+[[ "$1" == -n ]] && shift && MaxTickets=$1 && shift
+set -e
+((MaxTickets=MaxTickets+0))
+TicketDir=${1}
+Suffix=${2}
+RunScript="${3}"
+SourceScript="${4}"
+[[ -n "${RunScript}${SourceScript}" ]] || error_exit no processing command defined
+NextTicket=$(s.get_ticket ${TicketDir} ${Suffix})
+while [[ -n ${NextTicket} && ${MaxTickets} -gt 0 ]]
+do
+  echo processing ticket ${NextTicket}
+  [[ -n "${RunScript}" ]] && eval ${RunScript} ${TicketDir}/${NextTicket}
+  [[ -n "${SourceScript}" ]] && eval . ${SourceScript} ${TicketDir}/${NextTicket}
+  mv ${TicketDir}/${NextTicket} ${TicketDir}/${NextTicket}.DONE
+  NextTicket=""
+  ((MaxTickets=MaxTickets-1))
+  [[ ${MaxTickets} -gt 0  ]]  && NextTicket=$(s.get_ticket ${TicketDir} ${Suffix})
+done

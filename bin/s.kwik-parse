@@ -1,0 +1,150 @@
+#!/bin/ksh
+if [[ "$1" = --h* || "$1" = -h* ]] ; then
+  echo 'usage eval `s.kwik-parse [--defval="nm1=val1 nm2=val2 ..."] [--strict] [--accept=nm1,nm2,...,nmn] [--need=nm1,nm2,...,nmn] [--prefix=xxx] "$@"`'
+  echo "example:"
+  set -x
+  s.kwik-parse --prefix=arg_ 1 2  -a a -b -a s -b -c c v n -c -- cv -cv -cv nn
+  set +x
+  eval `s.kwik-parse --prefix=arg_ 1 2  -a a -b -a s -b -c c v n -c -- cv -cv -cv nn`
+  echo ""
+  echo after 'eval ` ..... `'
+  echo ""
+  echo 'set | grep arg_'
+  set | grep arg_
+  echo ""
+  echo 'echo "positional arguments=$@"'
+  echo "positional arguments=$@"
+  exit 0
+fi
+Prefix="P_"
+CheckList=""
+Strict=""
+NeedList=""
+DefList=""
+Positional=""
+State="INIT"
+NameList=""
+Error=""
+while test "$1"
+do
+ if [[  "${State}" != "DONE" ]] ; then
+   case $1 in
+   --defval=* )
+          [[ "${State}" = "INIT" ]] && [[ "${DefList}" = "" ]] && DefList="${1#*=}"
+	  shift
+          CurrentName="Positional"
+	  unset Value
+          ;;
+   --need=* )
+          [[ "${State}" = "INIT" ]] && [[ "${NeedList}" = "" ]] && NeedList="${1#*=}"
+	  shift
+          CurrentName="Positional"
+	  unset Value
+          ;;
+   --accept=* )
+          [[ "${State}" = "INIT" ]] && [[ "${CheckList}" = "" ]] && CheckList="${1#*=}"
+	  shift
+          CurrentName="Positional"
+	  unset Value
+          ;;
+   --strict )
+          [[ "${State}" = "INIT" ]] && Strict="y"
+	  shift
+          CurrentName="Positional"
+	  unset Value
+          ;;
+   --prefix=* )
+          [[ "${State}" = "INIT" ]] && [[ "${Prefix}" = "P_" ]] && Prefix=${1#*=}
+	  shift
+          CurrentName="Positional"
+	  unset Value
+          ;;
+   -- )
+          CurrentName="Positional"
+	  unset Value
+	  shift
+	  State="DONE"
+          ;;
+   -[a-zA-Z0-9] )
+          CurrentName=${1#-}
+	  unset Value
+	  shift
+	  if [[ "$1" != -* && "$1" != +[a-zA-Z] && -n "$1" ]] ; then
+	    Value="$1"
+	    shift
+	  fi
+	  unset State
+	  Init="yes"
+	  ;;
+   -[a-zA-Z0-9]* )
+          CurrentName=`echo "${1#-}" | cut -c1`
+	  Value="${1#-?}"
+	  shift
+	  unset State
+	  ;;
+   +[a-zA-Z0-9] )
+          CurrentName=${1#+}
+	  Value="+"
+	  shift
+	  unset State
+	  ;;
+   --[a-zA-Z]+([_a-zA-Z0-9])=* | --[a-zA-Z0-9]=* )
+	  CurrentName=${1%%=*}
+	  CurrentName=${CurrentName#--}
+	  Value="${1#*=}"
+	  shift
+	  unset State
+          ;;
+   --[a-zA-Z]+([_a-zA-Z0-9]) | --[a-zA-Z0-9] )
+          CurrentName=${1##*-}
+	  shift
+	  if [[ "$1" != -*  && "$1" != +[a-zA-Z] && -n "$1" ]] ; then
+	    Value="$1"
+	    shift
+	  fi
+	  unset State
+          ;;
+   * )
+	  CurrentName="Positional"
+          Value="${1}"
+	  shift
+	  unset State
+          ;;
+   esac
+   if [[ "${CurrentName}" = "Positional" ]] ; then
+      [[ -n "${Value}" ]] && \
+      Positional="${Positional} ${Value}"
+   else
+      if [[ "${CheckList}" != "" ]] ; then
+        echo ",${CheckList}," | grep -qv ",${CurrentName}," && echo "${CurrentName} option rejected" 1>&2 && unset CurrentName
+	[[ -n "${Strict}" ]] && [[ -z "${CurrentName}" ]] && echo "strict mode enforced, will abort" 1>&2 && Error="1"
+      fi
+      [[ -z "${CurrentName}" ]] && continue
+      echo " ${NameList} " | grep -qv "${CurrentName}" && \
+      NameList="${NameList} ${CurrentName}" && \
+      echo "${Prefix}${CurrentName}=\"${Value}\"" && \
+      unset Value
+      [[ -n "${Value}" ]] && \
+      echo "${Prefix}${CurrentName}=\"\$${Prefix}${CurrentName} ${Value}\";"
+   fi
+ else
+   Positional="${Positional} ${1}"
+   shift
+ fi
+done
+echo "${Prefix}NameList=\"${NameList}\";"
+echo set -- ${Positional}
+for i in ${DefList}
+do
+  echo "${Prefix}${i%%=*}=\"\${${Prefix}${i%%=*}:-${i#*=}}\";"
+done
+for i in ${NameList}
+do
+  echo "${Prefix}${i}=\"\${${Prefix}${i}:--}\";"
+done
+[[ -z "${NeedList}" ]] && exit ${Error:-0}
+for i in `echo "${NeedList}" | sed 's/,/ /g'`
+do
+  echo " ${NameList} " | grep -qv " ${i} " && echo "ERROR: mandatory parameter '$i' not found" 1>&2 && Error="1"
+done
+exit ${Error:-0}

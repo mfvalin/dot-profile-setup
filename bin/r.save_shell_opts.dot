@@ -1,0 +1,6 @@
+SavedShellOptions="${SavedShellOptions:-:}"
+Temp='+x' && [[ "$-" = *x* ]] && Temp='-x'
+SavedShellOptions="${SavedShellOptions} ${Temp}"
+Temp='+e' && [[ "$-" = *e* ]] && Temp='-e'
+SavedShellOptions="${SavedShellOptions} ${Temp}:"
+unset Temp || true

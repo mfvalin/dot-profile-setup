@@ -1,0 +1,17 @@
+#!/bin/ksh
+function enleve
+{
+  for TeMp in $* 
+  do
+    aenlever=$TeMp
+ #   echo on enleve $aenlever
+    newenv=`echo $contenu | sed -e "s,${aenlever}:*,, " -e 's/:$//'`
+    export $varenv="$newenv"
+    contenu="$newenv"
+  done
+}
+varenv=$1
+##aenlever=`echo $2 | sed -e 's/[ ]*$//'`
+#echo variable=$varenv
+eval contenu='$'$varenv
+enleve $2

@@ -1,0 +1,35 @@
+#!/bin/ksh
+# usage: r.get_arch hostname
+#
+# get qualified architecture name for host (OS + processor)
+#
+[[ "$1" = -h* ]] && echo 'usage: r.get_arch hostname' && exit 0
+[[ "$1" = zeta ]] && echo AIX && exit 0
+[[ "$1" = saiph ]] && echo AIX && exit 0
+[[ "$1" = algol ]] && echo AIX-powerpc7 && exit 0
+[[ "$1" = alef* ]] && echo Linux && exit 0
+[[ "$1" = dorval-ib ]] && echo Linux && exit 0
+[[ "$1" = ib-* ]] && echo Linux && exit 0
+[[ "$1" = pollux ]] && echo Linux_x86-64 && exit 0
+[[ "$1" = castor ]] && echo Linux_x86-64 && exit 0
+[[ "$1" = ib3* ]] && echo Linux_x86-64 && exit 0
+[[ "$1" = ib4* ]] && echo Linux_x86-64 && exit 0
+if [[ "$1" = "" ]]
+then
+ export TEMP_ARCH=`uname -s`
+ if [[ "$TEMP_ARCH" = Linux ]]
+ then
+  ProcessorType=$(uname -m)
+  if [[ "$ProcessorType" != *86 ]] ; then TEMP_ARCH=${TEMP_ARCH}_$( uname -m | sed 's/_/-/' ) ; fi
+ fi
+ [[ "$TEMP_ARCH" == AIX ]] && [[ "`uname -M`" != "IBM,9118-575" ]] && TEMP_ARCH=AIX-powerpc7
+ echo $TEMP_ARCH
+else
+ Command=$(true_path $0)
+ ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null || \
+ ( echo Retrying to get architecture for $1 1>&2 ; sleep 2 ; ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null ) || \
+ ( echo Retrying to get architecture for $1 1>&2 ; sleep 2 ; ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null ) || \
+ ( echo Retrying to get architecture for $1 1>&2 ; sleep 2 ; ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null ) || \
+ ( echo Retrying to get architecture for $1 1>&2 ; sleep 2 ; ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null ) || \
+ ssh -oStrictHostKeyChecking=no -oBatchMode=yes $1 $Command  2>/dev/null || echo unknown
+fi

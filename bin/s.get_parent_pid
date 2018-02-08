@@ -1,0 +1,12 @@
+#!/bin/ksh
+[[ "$1" == -h || "$1" == --help ]] && cat <<EOT 1>&2
+usage: ${0##*/} [pid]
+       returns the pid of the parent of process pid
+       if pid is not specified, the pid of the parent of the current shell is returned
+           ${0##*/}
+       is equivalent to 
+           echo \$PPID
+       ${0##*/} \$PPID
+       will return the pid of the parent of the current shell's parent
+EOT
+ps -ef | sed -e 's/  */ /g' -e 's/^ *//' | cut -f2-3 '-d ' | grep "^${1:-$PPID}" | sed 's/.* //'

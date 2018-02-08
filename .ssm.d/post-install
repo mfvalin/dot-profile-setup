@@ -1,0 +1,20 @@
+#!/bin/bash
+domainHome=$1
+packageHome=$2
+profileDirPath=${packageHome}/etc/profile.d
+packageName=${packageHome##*/}
+profilePath=${profileDirPath}/${packageName}.sh
+mkdir -p ${profileDirPath}
+Platform=`uname -s`
+if [ "$Platform" = "Linux" ] ; then Platform=${Platform}-`uname -m` ; fi
+#echo "#${packageName%%_*}_HOME=${packageHome}" >> ${profilePath}
+#
+profilePath=${packageHome}/bin/s.set_profile_hostbin.dot
+chmod 644 ${profilePath}
+echo 'Platform=`uname -s` ; [[ $Platform = Linux ]] && Platform=${Platform}-`uname -m`' >${profilePath}
+echo "PATH=\${HOME}/ECssm/${packageHome##*/}/hostbin/\${Platform}:\${PATH}" >> ${profilePath}
+chmod 644 ${profilePath}
+cd ${packageHome}/src
+mkdir -p ../hostbin/${Platform}
+PLATFORM=${Platform} make
+

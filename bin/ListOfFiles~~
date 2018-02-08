@@ -1,0 +1,98 @@
+.profile			sh/bash/ksh unified profile (user's .profile can be linked to this file)
+.profile_00000			profile preamble, used by .profile
+.profile_extras			helper to include some profile classes by user if needed (batch/ssh mode)
+.profile_ocm			ocm related profile file (partly out of date)
+.profile_switch			sh/bash/ksh unified profile switcher/chooser (user's .profile can be linked to this file)
+.profile_zzzzz			profile postamble, used by .profile
+GridEngine_Job_Header.dot	used by ord_soumet & consorts to generate GridEngine headers
+ListOfFiles~~			this file
+LoadLeveler_Job_Header.dot	used by ord_soumet & consorts to generate LoadLeveler headers
+UnixBatch_Job_Header.dot	used by ord_soumet & consorts to generate UNIX headers for the batch command
+augment_arch_path.dot		deprecated now, used to add extra architecture specific bin directories by ssmuse.dot
+gen_ld_build_path.dot		deprecated now, used to create EC_LD_LIBRARY_PATH  by ssmuse.dot
+o.set_array.dot			bash/ksh independent way to create a shell array
+ocm.profiles			find and read ocm profile files
+ord_soumet			submit a job
+ord_soumet_alpha		alpha version of ord_soumet
+ord_soumet_beta			beta version of ord_soumet
+r.Distribution			find name of Linux distribution
+r.choose_architecture		this script is for internal use by the .profile_... components
+r.cleanup_path			deprecated now, used to clean the PATH variable  by ssmuse.dot
+r.cleanup_tmpdir		used by the .profile_... components to remove the current TMPDIR
+r.clear_old_tmpdirs		used by the .profile_... components to remove old TMPDIR
+r.get_arch			get the name of the machine architecture
+r.python_version		get the version of python
+r.restore_shell_opts.dot	restore (stack stype) some shell options
+r.rsh_or_ssh			deprecated, used to determine is ssh can be used or if rsh must be used
+r.save_shell_opts.dot		save (stack stype) some shell options
+r.ssmuse-2.dot			sub component of ssmuse.dot
+r.ssmuse.dot			alias for s.ssmuse.dot (perpetuate the old name)
+r.suppress_compilers.dot	get rid of other versions of the compilers
+r.unexport.dot			sub component of ssmuse.dot
+r.unified_setup-cfg		alias for s.unified_setup-cfg
+r.which				alias for s.which (backward name compatibility)
+remote_exec.sh			execute a remote command with basic environment setup
+s.LLQ				list load leveler queues
+s.dir_is_empty			determine if a directory is empty
+s.echo				echo variant that can be controlled via verbosity environment variable
+s.fuse_ll_jobs			build a load leveler coscheduled job from a set of lajob.tar produced by ord_soumet
+s.get_ec_arch			get EC_ARCH value for machine
+s.get_parent_pid		get the pid of a process's parent
+s.get_pkg_cfg.dot		helper allowing a script to find (ssm wise) the location of it's domain, package, config files
+s.get_ticket			companion to the *ticket series, get a ticket from the queue
+s.getqdn			get best "fully qualified name" approximation
+s.hcrontab			equivalent of crontab -l for hcron
+s.install			substitute if a proper "install" is not available
+s.install_opt			installer/logger for specially packaged (tarred) external software
+s.job				list batch jobs "in flight" 
+s.kwik-parse			quick argument parser helper (experimental)
+s.list_ssm_shortcuts		list ssm shortcuts ( part of ssmuse.dot group 0
+s.locate			locate file(s) using ssmuse.dot maintained variables
+s.locate_item			used by s.locate to locate an individual item
+s.log_access			quick, cheap and dirty usage logger for scripts
+s.log_usage			quick, cheap and dirty usage logger for products
+s.login_warnings		used by the .profile_... components to print login messages
+s.mkdir_onebyone		mkdir -p done one level at a time (race condition avoidance with NFS)
+s.old-arch.dot			transform EC_ARCH from new style to old style
+s.prefix			prefix a list of values with a common prefix
+s.process_tickets		companion to the *ticket series, process a ticket
+s.profile_list			update $HOME/.profile.d/NAMES.list , used by the .profile_... components
+s.pushback_tickets		companion to the *ticket series, put a ticket back into the queue
+s.qad-parse			quick argument parser helper (experimental)
+s.resolve_ssm_shortcuts		used by ssmuse.dot to resolve shortcut names
+s.resolve_ssm_shortcuts+	alpha for s.resolve_ssm_shortcuts
+s.resolve_ssm_shortcuts-alpha	alpha for s.resolve_ssm_shortcuts
+s.set_dir_struct		create set of directories to support the various EC_ARCH flavors
+s.set_display_tracking          put DISPLAY in suitable remote form and copy to ~/.LOGIN_DISPLAY
+s.set_ec_arch.dot		set EC_ARCH to proper value
+s.set_ec_arch.dot+		alpha for s.set_ec_arch.dot
+s.set_job_tmpfs			unified (AIX/Linux) API to get name of tempfs fileystem (used by ord_soumet)
+s.set_profile_hostbin.dot	used by the .profile_... components to set PATH
+s.set_profile_hostbin.dot+	used by the .profile_... components to set PATH (alpha)
+s.sge_dummy_shell		sge dummy shell to avoid a logni shell for Grid Engine batch job
+s.ssm-creat			shorthand for ssm created
+s.ssm-install			shorthand for ssm install
+s.ssm-prep			frontend to ssmprep to rapidly build a ssm package
+s.ssm-publish			shorthand for ssm publish
+s.ssm-uninstall			shorthand for ssm uninstall
+s.ssm-unpublish			shorthand for ssm unpublish
+s.ssmuse+.dot			alpha for ssmuse.dot
+s.ssmuse-1.dot			old sub component of ssmuse.dot
+s.ssmuse-2.dot			old sub component of ssmuse.dot
+s.ssmuse-3.dot			sub component of ssmuse.dot
+s.ssmuse-4.dot			sub component of ssmuse.dot
+s.ssmuse-alpha.dot		alpha version of sub component of ssmuse.dot
+s.ssmuse.dot			used to acquire/configure software packages via shortcuts/bundles
+s.unified_setup-cfg		find where unified environment files are
+s.use				manage the absolute overrides ($TMPDIR/bin)
+s.usr_local_env			find where /usr/local/env would point on machine
+s.which				turbo charged which (not limited to executables)
+set_XWindows.dot		used by the .profile_... components for XWindows related setup
+set_host_specific.dot		some architecture specific setup for batch jobs (used by ord_soumet)
+set_hosts.dot			used by the .profile_... components to set TRUE_HOST
+set_interactive.dot		used by the .profile_... components for interactive setup
+set_tmpdir.dot			used by the .profile_... components to set TMPDIR
+soumet				alias for ord_soumet
+soumet_alpha			alias for ord_soumet_alpha
+soumet_beta			alias for ord_soumet_beta
+uname				"lying" version of uname for alef (currently deactivated)

@@ -1,0 +1,61 @@
+#!/bin/ksh
+[[ -z $1 ]] && set -- --help
+unset LookForHidden
+LookForDir=1
+LookForFile=1
+Yes=0
+No=1
+for i in "$@"
+do
+  case $i in 
+    --help )
+          cat << EOT 1>&2
+  usage: s.dir_is_empty [--hidden] [--nodir] [--nofile] [--not] directory_path
+  if --not is specified, the test is inverted
+  if --hidden is not specified, items starting with . are ignored
+  if --nodir is specified, subdirectories are ignored
+  if --nofile is specified, files are ignored
+  status = 0 if directory is empty of files (or sub directories is --subdir), 
+  status = 1 if not, 
+  status = 2 or more if error or help request
+EOT
+          exit 4
+          ;;
+    --not )
+          Yes=1
+          No=0
+          shift
+          ;;
+    --hidden )
+          LookForHidden=1
+          shift
+          ;;
+    --nodir )
+          unset LookForDir
+          shift
+          ;;
+    --nofile )
+          unset LookForFile
+          shift
+          ;;
+    * )   
+          break
+          ;;
+  esac
+done
+[[ -d $1 ]] && cd $1 || exit 2
+# look for visible files and/or dirs
+for i in *
+do
+  [[ -n $LookForFile ]] && [[ -f $i ]] && exit $No
+  [[ -n $LookForDir ]] && [[ -d $i ]] && exit $No
+done
+[[ -z $LookForHidden ]] && exit $Yes
+# look for hidden files and/or dirs
+for i in .?*
+do
+  [[ "$i" = ".." ]] && continue
+  [[ -n $LookForFile ]] && [[ -f $i ]] && exit $No
+  [[ -n $LookForDir ]] && [[ -d $i ]] && exit $No
+done
+exit $Yes

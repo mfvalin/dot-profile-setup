@@ -1,0 +1,38 @@
+export HOST=`hostname`
+export HOSTNAME=`hostname`
+export TRUE_HOST=${HOST%%.*} ;
+# take care of known clusters
+if [[ -n $CC_CLUSTER ]] ; then export TRUE_HOST=$CC_CLUSTER ; fi
+if [[ $HOST = colosse* ]] ; then export TRUE_HOST=colosse1 ;  fi
+if [[ $HOST = r1* ]] ; then export TRUE_HOST=colosse1 ;  fi
+if [[ $HOST = lg-1r14* ]] ; then export TRUE_HOST=localhost ;  fi
+if [[ $HOST = sw-2* ]] ; then export TRUE_HOST=localhost ;  fi
+if [[ $HOST = lm-2* ]] ; then export TRUE_HOST=localhost ;  fi
+if [[ $HOST = hb-2* ]] ; then export TRUE_HOST=localhost ;  fi
+if [[ $HOST == cp[0-9][0-9][0-9][0-9] ]] ; then TRUE_HOST=ip03 ; fi
+if [[ $HOST == cp[0-9][0-9][0-9] ]] ; then TRUE_HOST=ip03 ; fi
+
+if [[ $HOST = lg-1r17* ]] ; then export TRUE_HOST=phase2 ;  fi
+if [[ $HOST = sw-4* ]] ; then export TRUE_HOST=phase2 ;  fi
+if [[ $HOST = lm-4* ]] ; then export TRUE_HOST=phase2 ;  fi
+if [[ $HOST = lm-1* ]] ; then export TRUE_HOST=phase2 ;  fi
+if [[ $HOST = aw-* ]] ; then export TRUE_HOST=phase2 ;  fi
+if [[ $(uname -r) == *.el6.* ]] ; then export TRUE_HOST=phase2 ;  fi
+[[ "$TRUE_HOST" == phase2 ]] && [[ ! -f ${HOME}/.use_phase2 ]] && export TRUE_HOST=guillimin
+
+export CLUSTER_NAME=$TRUE_HOST
+if [[ $HOST = colosse* ]] ; then export CLUSTER_NAME=colosse ;  fi
+if [[ $HOST = r1* ]] ; then export CLUSTER_NAME=colosse ;  fi
+if [[ $HOST = lg-* ]] ; then export CLUSTER_NAME=guillimin ;  fi
+if [[ $HOST = sw-* ]] ; then export CLUSTER_NAME=guillimin ;  fi
+if [[ $HOST = lm-* ]] ; then export CLUSTER_NAME=guillimin ;  fi
+if [[ $HOST = hb-* ]] ; then export CLUSTER_NAME=guillimin ;  fi
+if [[ $HOST = aw-* ]] ; then export CLUSTER_NAME=guillimin ;  fi
+if [[ $HOST == *.cluster10.local ]] ; then export CLUSTER_NAME=marvin ; fi
+if [[ $HOST == st*.cluster10.local ]] ; then export CLUSTER_NAME=st ; fi
+if [[ $HOST == skynet*.cluster10.local ]] ; then export CLUSTER_NAME=skynet ; fi
+
+[[ $HOST == cp[0-9][0-9][0-9][0-9] ]] && CLUSTER_NAME=mammouth-ms
+[[ $HOST == cp[0-9][0-9][0-9] ]] && CLUSTER_NAME=mammouth-mp2
+
+. s.set_ec_arch.dot

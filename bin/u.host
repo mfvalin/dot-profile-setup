@@ -1,0 +1,21 @@
+#!/bin/bash
+case $1 in
+ guillimin | lg-1r14-n0*)
+  ((base=$(date +%s)+0))
+  for target in 1 2 3 4 5 6
+  do
+    ((dest=1+(base+target)%6))
+#set -x
+    ping -q -c1 -W1 lg-1r14-n0${dest} >/dev/null 2>/dev/null && ssh lg-1r14-n0${dest} "/opt/moab/bin/showbf 2>/dev/null 1>/dev/null" && echo lg-1r14-n0${dest} && exit 0
+set +x
+  done
+  echo guillimin.clumeq.ca
+  ;;
+ colosse)
+  echo colosse.clumeq.ca
+  ;;
+ *)
+  host ${1}.sca.uqam.ca >/dev/null 2>/dev/null && echo ${1}.sca.uqam.ca && exit 0
+  host ${1}.cmc.ec.gc.ca >/dev/null 2>/dev/null && echo ${1}.cmc.ec.gc.ca && exit 0
+  ;;
+esac

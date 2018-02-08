@@ -1,0 +1,6 @@
+MY_name=${0##*/}
+MY_domain=${0%%/bin/*}/../..
+MY_incl=${0%%/bin/*}/include
+MY_path=`true_path $0`
+MY_pkg=${MY_path%%/bin/*}
+MY_cfg=${MY_pkg}/cfg

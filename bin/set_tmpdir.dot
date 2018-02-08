@@ -1,0 +1,25 @@
+export ZZZPID=$$
+export TMPBASE=/tmp/$LOGNAME
+for base in /localscratch ${LSCRATCH}/ /data/local/tmpdirs/$LOGNAME ${SCRATCH} ${SLURM_TMPDIR} $HOME/tmp/$TRUE_HOST $HOME/tmp/$HOST
+do
+  [[ -d $base ]] || continue
+  [[ -d $base ]] && mkdir -p $base/$LOGNAME 2> /dev/null
+  if [[ -d $base/$LOGNAME ]] ; then export TMPBASE=$(readlink -e ${base}/$LOGNAME) ; fi
+done
+export TMPDIR=$TMPBASE/$ZZZPID
+mkdir -p $TMPBASE 2> /dev/null
+mkdir -p $TMPDIR 2> /dev/null
+if [[ ! -d $TMPDIR ]]
+then
+  echo set_tmpdir.dot ERROR: Cannot create TMPDIR="'"$TMPDIR"'", trying to use /tmp
+  export TMPDIR=/tmp
+fi
+(mkdir -p $TMPDIR/bin) 2> /dev/null
+export BATCH_TMPDIR=$TMPDIR
+export SCRATCH=$TMPDIR
+export BIG_TMPDIR=$TMPDIR
+test -d $HOME/bigtmp/$TRUE_HOST && mkdir -p $HOME/bigtmp/$TRUE_HOST/$ZZZPID && test -d $HOME/bigtmp/$TRUE_HOST/$ZZZPID && export BIG_TMPDIR=$HOME/bigtmp/$TRUE_HOST/$ZZZPID
+test -d $HOME/big_tmp/$TRUE_HOST && mkdir -p $HOME/big_tmp/$TRUE_HOST/$ZZZPID && test -d $HOME/big_tmp/$TRUE_HOST/$ZZZPID && export BIG_TMPDIR=$HOME/big_tmp/$TRUE_HOST/$ZZZPID
+test -d $HOME/xfertmp/$TRUE_HOST && export XFER_DIR=$HOME/xfertmp/$TRUE_HOST
+test -d $HOME/xfer_tmp/$TRUE_HOST && export XFER_DIR=$HOME/xfer_tmp/$TRUE_HOST
+unset base || true

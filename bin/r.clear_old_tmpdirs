@@ -1,0 +1,74 @@
+#!/bin/ksh 
+# cleanup of old TMPDIRs
+#
+# used by the .profile... family
+#
+if [ "$TMPBASE" = "" ]
+then
+  echo clear_tmp ERROR: TMPBASE not set , no cleanup action is possible
+else
+  if [ -d $TMPBASE ]
+  then
+    cd $TMPBASE
+    for TeMp in `/bin/ls -d [0-9]* 2>/dev/null`
+    do
+    #  echo looking for process $TeMp
+      if r.kill0 $TeMp
+      then
+          if [ "$NO_MESSAGES" = "" ]
+          then
+            echo process $TeMp active
+          fi
+      else
+      	  rm -fr $TMPBASE/$TeMp 2>/dev/null
+          if [ "$NO_MESSAGES" = "" ]
+          then
+            echo process $TeMp not found , removing $TMPBASE/$TeMp
+          fi
+      fi
+    done
+  fi
+fi
+# cleanup of old BIGTMPDIRs
+if [[ -d $HOME/Bigtmp/$TRUE_HOST ]]
+then
+  cd $HOME/bigtmp/$TRUE_HOST
+  for TeMp in `/bin/ls -d [0-9]* 2>/dev/null`
+  do
+  #  echo looking for process $TeMp
+    if r.kill0 $TeMp
+    then
+        if [ "$NO_MESSAGES" = "" ]
+        then
+          echo process $TeMp active
+        fi
+    else
+    	  rm -fr $HOME/bigtmp/$TRUE_HOST/$TeMp 2>/dev/null
+        if [ "$NO_MESSAGES" = "" ]
+        then
+          echo process $TeMp not found , removing $HOME/bigtmp/$TRUE_HOST/$TeMp
+        fi
+    fi
+  done
+fi
+if [[ -d $HOME/Big_tmp/$TRUE_HOST ]]
+then
+  cd $HOME/big_tmp/$TRUE_HOST
+  for TeMp in `/bin/ls -d [0-9]* 2>/dev/null`
+  do
+  #  echo looking for process $TeMp
+    if r.kill0 $TeMp
+    then
+        if [ "$NO_MESSAGES" = "" ]
+        then
+          echo process $TeMp active
+        fi
+    else
+    	  rm -fr $HOME/big_tmp/$TRUE_HOST/$TeMp 2>/dev/null
+        if [ "$NO_MESSAGES" = "" ]
+        then
+          echo process $TeMp not found , removing $HOME/big_tmp/$TRUE_HOST/$TeMp
+        fi
+    fi
+  done
+fi

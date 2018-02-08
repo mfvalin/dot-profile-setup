@@ -1,0 +1,6 @@
+if [[ "${SavedShellOptions}" = :*: ]] ; then
+  SavedShellOptions=${SavedShellOptions%:}
+  echo resetting shell options to ${SavedShellOptions##*:} 1>&2
+  set ${SavedShellOptions##*:}
+  SavedShellOptions=${SavedShellOptions%:*}:
+fi

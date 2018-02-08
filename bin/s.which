@@ -1,0 +1,91 @@
+#!/bin/ksh
+#set -ef
+set -e
+[[ "$1" = --help ]] && set -- -h
+Execute=y
+Dot=y
+printfcommand=printf
+lscommand=true
+editcommand=true
+ALLMATCHES=0
+while getopts hlavdex whichopts
+do
+        case "$whichopts" in
+                a) ALLMATCHES=1 ;;
+                l) printfcommand=true ; lscommand=ls ;;
+                e) editcommand=view ;;
+                d) Execute="" ; Dot=y ;;
+                x) Dot="" ; Execute=y ;;
+                v) DOTTABLE="dottable "; EXECUTABLE="executable " ;;
+              h|?) printf "Usage: %s [-a] [-v] [-d] [-x] [-l] [-e] args\n" ${0##*/} 1>&2 ;
+                   printf "       args may contain shell file pattern(s)\n" 1>&2 ;
+                   printf "       -l : ls -l matching item(s) \n" 1>&2 ;
+                   printf "       -e : view matching item(s) \n" 1>&2 ;
+                   printf "       -v : verbose mode\n" 1>&2 ;
+                   printf "       -d : only print dottable files\n" 1>&2 ;
+                   printf "       -x : only print executable files\n" 1>&2 ;
+                   printf "       -a : print all occurrences of each arg (default is first occurrence only)\n" 1>&2 ; exit 2 ;;
+        esac
+done
+shift $(($OPTIND - 1))
+
+if [ "$#" -eq 0 ]; then
+ ALLRET=1
+else
+ ALLRET=0
+fi
+case $PATH in
+ *::) : "not *DIR:" ;;
+  *:) PATH="$PATH:" ;;
+esac
+for PROGRAM in "$@"; do
+ RET=1
+ IFS_SAVE="$IFS"
+ IFS=:
+ case $PROGRAM in
+  */*)
+   if [ -f "$PROGRAM" ] && [ -x "$PROGRAM" ]; then
+    [ "$Execute" = "y" ] && printf '%s\n' "${EXECUTABLE}$PROGRAM"
+    RET=0
+   else
+     if [ -f "$PROGRAM" ] && [ -r "$PROGRAM" ]; then
+      [ "$Dot" = "y" ] && printf '%s\n' "${DOTTABLE}$PROGRAM"
+      RET=0
+     fi
+   fi
+   ;;
+  *)
+   for ELEMENT in $PATH ; do
+   IFS="$IFS_SAVE"
+    if [ -z "$ELEMENT" ]; then
+     ELEMENT=.
+    fi
+    TarGetS="$(echo $ELEMENT/$PROGRAM)"
+    for TarGet in $TarGetS
+    do
+      if [ -f "$TarGet" ] && [ -x "$TarGet" ]; then
+       [ "$Execute" = "y" ] && $printfcommand '%s\n' "${EXECUTABLE}$TarGet"
+       [ "$Execute" = "y" ] && $lscommand -al "$TarGet"
+       [ "$Execute" = "y" ] && $editcommand "$TarGet"
+       RET=0
+       [ "$ALLMATCHES" -eq 1 ] || break 2
+      else
+        if [ -f "$TarGet" ] && [ -r "$TarGet" ]; then
+         [ "$Dot" = "y" ] && $printfcommand '%s\n' "${DOTTABLE}$TarGet"
+         [ "$Dot" = "y" ] && $lscommand -al  "$TarGet"
+         [ "$Dot" = "y" ] && $editcommand  "$TarGet"
+         RET=0
+         [ "$ALLMATCHES" -eq 1 ] || break 2
+        fi
+      fi
+    done
+   done
+   ;;
+ esac
+ IFS="$IFS_SAVE"
+ if [ "$RET" -ne 0 ]; then
+  ALLRET=1
+ fi
+done
+
+exit "$ALLRET"

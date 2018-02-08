@@ -1,0 +1,142 @@
+#!/bin/bash
+usage()
+{
+cat <<EOT
+  ${0##*/} [-h|--help] [--asis] [-l|--list] [--to=queue] [--from=superjob_queue_name] list of job names
+  ex:
+      ${0##*/} --to=hb '*exp1*'
+            resubmit all jobs with a name matching *exp1* to the hb queue
+      ${0##*/} --to=same '*exp1*'
+            resubmit all jobs with a name matching *exp1* to their original queue
+      ${0##*/} --asis '*exp1*'
+            resubmit all jobs with a name matching *exp1* to their original queue
+      ${0##*/} -l --from=myq@ --to=myotherq@ '*exp1*'     
+            move all jobs with a name matching *exp1* from deferred queue myq to deferred queue myotherq
+      ${0##*/} -l --from=myq@ --to=sw '*exp1*'
+            remove all jobs with a name matching *exp1* from deferred queue myq
+            after submitting them to guillimin in queue sw
+      ${0##*/} -l --from=myq@ --to=same '*exp1*'
+            remove all jobs with a name matching *exp1* from deferred queue myq
+            after submitting them to guillimin in their original queue
+      ${0##*/} -l --from=myq@ 
+            list all jobs in deferred queue myq
+      ${0##*/} -l
+            list all jobs 
+  NOTE: if the listing file for a job exists, the job is deemed active and NOTHING will get done
+EOT
+}
+list=""
+to=""
+from=""
+run=""
+while [[ -n "$1" ]] ; do
+case $1 in
+ -h|--help)
+    usage
+    exit 0
+    ;;
+ --dryrun|--dry-run|-n|--echo|--no|--no-run)
+    run="echo"
+    ;;
+ --asis)
+    to="same"
+    ;;
+ --to*)
+    to="${1#--to=}"
+    ;;
+ -l|--list)
+    list=yes
+    ;;
+ --from*)
+    from="${HOME}/.job_queues/${1#--from=}"
+    from="${from%%@*}"
+    ;;
+ -*)
+    usage
+    exit 1
+    ;;
+ *)
+    break
+    ;;
+esac
+shift
+done
+[[ -z ${list}${from}${to} ]] && echo "ERROR: at least one option must be specified" && usage && exit 1
+FROM=${from:-${HOME}/.ord_soumet.d/wrap/batch}
+[[ ! -d ${FROM} ]] && echo job source directory ${FROM} does not exist && exit 1
+cd ${FROM} || exit 1
+[[ -z ${to} ]] && [[ -z "$1" ]] && set -- '*'
+echo "$@ from $(pwd)"
+for i in "$@"
+do
+  for j in  ${i##*/}
+  do
+    if [[ -f "${j}" ]] ; then
+      CurrentJobId=$(grep '^# JOB ID =' ${j} | tail -1 | sed 's/^# JOB ID = //')   # get last valid JOB ID from job file
+      CurrentQueue=$(grep '^#PBS -q ' ${j} | sed 's/^#PBS -q //')                   # get batch queue from job file
+      listingfile="$(grep ListingFile= ${j} | sed 's/^export ListingFile=//')"     # get name of listing file from job file
+      Active="" ; [[ -f ${listingfile} ]] && Active="ACTIVE"  # listing file exists, jod is deemed active
+
+      TO="${to}"
+      [[ "${TO}" == same ]] && TO=${CurrentQueue}
+
+      [[ -n ${list}${to}${from} ]] && \
+        echo "${j} LISTING=${listingfile} JOB_ID=${CurrentJobId} Queue=${CurrentQueue} ${Active}"
+      [[ -n ${to} ]] || continue        # list only, process next file 
+      [[ -n ${Active} ]] && \
+        echo "job ${j} is active and cannot be acted upon" && \
+        continue
+
+      if [[ ${FROM} == *.ord_soumet.d* ]] ; then   # job comes from ord_soumet normal source
+
+        if [[ ${CurrentJobId} == deferred* ]]; then
+          echo "cannot submit a deferred job  as a regular job from ${FROM}"
+          continue      # a deferred job MUST be handled through it's deferred queue
+        fi
+
+        if [[ "${TO}" == *@* ]] ; then
+          echo "associating job ${j} to deferred queue ${TO%%@*}"
+          echo "# JOB ID = deferred@${TO%%@*}" >>${FROM}/${j}
+          mkdir -p ${HOME}/.job_queues/${TO%%@*}
+          ln -s ${FROM}/${j} ${HOME}/.job_queues/${TO%%@*}/${j}
+          continue      # job has been linked into a deferred job directory
+        fi
+
+        to_resubmit="$(pwd)/${j}"     # to be passed to soumet_a_guillimin
+        to_remove=""                  # nothing to remove afterwards
+
+      else                                         # job comes from a deferred queue
+
+        if [[ "${TO}" == *@* ]] ; then
+          echo moving deferred job from ${FROM##*/} to ${TO%%@*}
+          mkdir -p ${HOME}/.job_queues/${TO%%@*}
+          echo "# JOB ID = deferred@${TO%%@*}" >>${FROM}/${j}
+          mv ${FROM}/${j} ${HOME}/.job_queues/${TO%%@*}
+          continue
+        fi
+
+        to_resubmit="$(pwd)/${j}"     # to be passed to soumet_a_guillimin
+        to_remove="$(pwd)/${j}"       # deferred job link to remove after job submission
+
+      fi
+
+      if [[ "${TO}" != "${CurrentQueue}" ]] ; then  # change batch queue in job
+        [[ "${TO}" == sw ]] || [[ "${TO}" == lm ]] || [[ "${TO}" == hb ]] || [[ "${TO}" == debug ]] || \
+          { echo "invalid batch queue: ${TO}" ; continue ; }
+        TrueFile=$(true_path ${j})
+        sed -s "s/^#PBS -q ${CurrentQueue}/#PBS -q ${TO}/" <${TrueFile} >${TrueFile}_____ 
+        mv ${TrueFile}_____ ${TrueFile}
+        echo "changed batch job queue of ${j} from ${CurrentQueue} to ${TO}"
+#        echo "cannot change batch job queue ${CurrentQueue} to ${TO}" && continue
+      fi
+
+      [[ -n ${to_resubmit} ]] && \
+        echo "resubmitting ${to_resubmit} to queue ${TO}" && \
+        ${run} soumet_a_guillimin guillimin.clumeq.ca submit ${to_resubmit}
+      grep "^# JOB ID =" ${to_resubmit}
+      [[ -n ${to_remove} ]] && \
+        echo "removing ${to_remove}" && \
+        ${run} rm ${to_remove}
+    fi
+  done
+done

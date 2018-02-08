@@ -1,0 +1,4 @@
+#!/bin/ksh
+AnSwEr=rsh
+ssh ${1:-localhost} -n -oStrictHostKeyChecking=no -oBatchMode=yes hostname 2>/dev/null 1>/dev/null && AnSwEr=ssh
+echo ${AnSwEr}

@@ -1,0 +1,14 @@
+#!/bin/bash
+if [[ "$1" = "-h" ]]
+then
+  echo usage: r.rxterm [machine [xterm options]]
+  exit 0
+fi
+RLOGIN_COMMAND=ssh
+norsh=1
+usr=$LOGNAME
+[ $# -lt 1 ] && set -- localhost
+sv=$1
+shift
+xterm -sb -sl 600 -n ${usr}@${sv} -title ${usr}@${sv} $* -e $RLOGIN_COMMAND -X ${sv} -l ${usr} &
+

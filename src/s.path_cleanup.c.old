@@ -1,0 +1,123 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+static  char **eliminate=NULL;
+static  int n_eliminate=0;
+
+print_usage(char *name)
+{
+   fprintf(stderr,"USAGE: %s -pat1 -pat2 ... -patn item1 item2 ... itemn \n",name);
+   fprintf(stderr,"       pat1..patn simple patterns to eliminate\n");
+   fprintf(stderr,"       item = EnvName \n");
+   fprintf(stderr,"       EnvName is the name of an environment variable containing a path\n");
+   fprintf(stderr,"ex:    %s PATH MANPATH EC_LD_LIBRARY_PATH\n",name);
+   fprintf(stderr,"       %s LD_LIBRARY_PATH EC_INCLUDE_PATH\n",name);
+   fprintf(stderr,"ex:    %s -/a/b/ -machin/patente PATH MANPATH EC_LD_LIBRARY_PATH\n",name);
+}
+
+int is_duplicate(char *what, char **table, int nentries)
+{
+  int i;
+  for(i=0;i<n_eliminate;i++) { if ( strstr(what,1+eliminate[i]) ) return 1; }
+  while(nentries>0){
+    if(strcmp(what,table[nentries-1]) == 0) return 1;
+/*fprintf(stderr,"%s not equal to %s\n",what,table[nentries-1]);*/
+    nentries--;
+  }
+  return 0;
+}
+
+main(int argc, char **argv)
+{
+  char *env_var;
+  char *sub_path[1204];
+  char env_value[32768];
+  int nsubpath;
+  int i;
+  char separator=':';
+  char *temp;
+  char *TMPDIR=getenv("TMPDIR");
+  char tmpdir_bin[1024];
+  char *HOME=getenv("HOME");
+  char ovbin[1024];
+  int len_ovbin;
+  char *varname;
+
+  if(argc < 2 ) { print_usage(argv[0]) ; exit(1); }
+
+  if(strcmp( "-h",argv[1])==0 || strcmp("--help",argv[1])==0 ) { print_usage(argv[0]) ; exit(1); }
+  argc-- ; argv++;
+  if(**argv == '-') {
+    eliminate=argv;
+    while(argc > 0 && **argv == '-') { n_eliminate++ ; argc-- ; argv++ ; }
+  }
+/* for ( i=0 ; i<n_eliminate ; i++ ) { fprintf(stderr,"eliminating '%s'\n",1+eliminate[i]); } */
+  tmpdir_bin[0]='\0';  /* tempdir/bin, top override */
+  if(TMPDIR != NULL) snprintf(tmpdir_bin,1023,"%s/bin%c",TMPDIR,'\0'); tmpdir_bin[1023]='\0';
+
+  ovbin[0]='\0';  /* base of ovbin directories, ~/ovbin */
+  if(HOME   != NULL) snprintf(ovbin     ,1023,"%s/ovbin%c",HOME,'\0'); ovbin[1023]='\0';
+  len_ovbin=strlen(ovbin);
+
+  while(argc--){                /* loop over cEnvName arguments */
+    varname=argv[0];
+    if( isalnum(*varname) || *varname=='_' ) {
+      separator = '\0';
+    }else{
+      separator = *varname++;
+    }
+    env_var=getenv(varname);    /* get value of environment variable */
+    if(env_var != NULL){        /* make sure it exists */
+      strncpy(env_value,env_var,32767); env_value[32767]='\0';  /* take a copy */
+      temp=env_value;
+      if(separator == '\0')
+        while(*temp != '\0' && *temp != ':' &&  *temp != ' ' && *temp != ';') temp++;  /* find separator, one of blank , colon, semicolon */
+      separator=*temp;
+      temp=env_value;
+      while( *temp == separator && *temp != '\0') temp++;       /* get rid of leading separators */
+
+      nsubpath=1;
+      sub_path[0]=temp;
+
+      while(1){
+        while( *temp != separator && *temp != '\0') temp++;     /* skip to next separator */
+        if(*temp == '\0') break;                                /* OOPS end */
+        *temp='\0'; temp++;
+        if(is_duplicate(sub_path[nsubpath-1],sub_path,nsubpath-1)) /* duplicate entry in path ? */
+          nsubpath--;
+        while( *temp == separator && *temp != '\0') temp++;     /* skip all consecutive separators */
+        if(*temp == '\0') break;                                /* OOPS end */
+        sub_path[nsubpath++]=temp;
+      }
+      if(is_duplicate(sub_path[nsubpath-1],sub_path,nsubpath-1)) /* duplicate entry in path ? */
+        nsubpath--;
+
+      fprintf(stdout,"%s='",varname);                          /* variable_name= */
+
+      for(i=0 ; i<nsubpath ; i++){
+         if(0 == strcmp(sub_path[i],tmpdir_bin) ){               /* $TMPDIR/bin ? */
+           fprintf(stdout,"%s%c",sub_path[i],separator);
+           sub_path[i]=NULL;                                     /* yes, suppress entry */
+         }
+      }
+      while(sub_path[nsubpath-1] == NULL) nsubpath--;            /* suppress NULLs at tail of list */
+      for(i=0 ; i<nsubpath ; i++){
+         if(sub_path[i] == NULL) continue;
+         if(0 == strncmp(sub_path[i],ovbin,len_ovbin) ){         /* $HOME/ovbin... ? */
+           fprintf(stdout,"%s%c",sub_path[i],separator);
+           sub_path[i]=NULL;                                     /* yes, suppress entry */
+         }
+      }
+      while(sub_path[nsubpath-1] == NULL) nsubpath--;            /* suppress NULLs at tail of list */
+      for(i=0 ; i<nsubpath-1 ; i++)                              /* output non override values */
+        if(sub_path[i] != NULL)
+          fprintf(stdout,"%s%c",sub_path[i],separator);
+        fprintf(stdout,"%s'\n",sub_path[nsubpath-1]);            /* no separator after last value */
+    }else{   /* specified path environment variable does notexist, do nothing */
+/*      fprintf(stdout,"%s='%s'\n",*argv,"NULL");*/
+    }
+    argv++;
+  }
+}

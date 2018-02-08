@@ -1,0 +1,80 @@
+#!/bin/ksh
+#
+# locate an item in a list of directories whith a possible set of prefix+postfixes
+#
+split=":"
+prefix=''
+postfixes=''
+MatchAll=''
+LocalArgs=1
+NotFound=1
+while [[ -n $LocalArgs ]]
+do
+  case "$1" in
+  --help|-h)
+         echo "usage  : s.locate_item [--allmatches] [--split=cC] [--prefix=xxx] ['--postfix=a b c'] item list_of_directories" 1>&2
+         echo "         --split=cC : split list_of_directories using c or C as an element separator (default is :)" 1>&2
+         echo "         item may be a pattern like '[a-z]*' " 1>&2
+         echo "example: s.locate_item  --prefix=lib '--postfix=.a.fl .so .a' '*' \$ARMNLIB/lib/Linux ." 1>&2
+         exit 1
+         ;;
+  --prefix=[a-zA-Z]+([a-zA-Z0-9]) )
+         prefix="${1#--prefix=}"
+         shift
+         ;;
+  --allmatches* )
+         MatchAll=yes
+         shift
+         ;;
+  --split=* )
+         split="${1#--split=}"
+         shift
+         ;;
+  --prefix= )
+         shift
+         ;;
+  --prefix=* )
+         echo invalid prefix "${1#--prefix=}" ignored 1>&2
+         exit 1
+         shift
+         ;;
+  --postfix= )
+         shift
+         ;;
+  --postfix=* )
+         postfixes="${postfixes} ${1#--postfix=}"
+         shift
+         ;;
+  --)
+         shift
+         unset LocalArgs
+         ;;
+  *)
+         unset LocalArgs
+         ;;
+  esac
+done
+[[ -z ${postfixes} ]] && postfixes="NoNe"
+what="${1}"
+shift
+CurrentDir=$(true_path .)
+for Target in $( echo "$@" | tr "$split" "     " )
+do
+  [[ -d ${Target} ]] || continue
+  cd ${Target}
+  for item in "${what}"
+  do
+    for postfix in ${postfixes}
+    do
+      [[ $postfix = "NoNe" ]] && postfix=""
+      for which in ${prefix}${item}${postfix}
+      do
+#       echo looking for ${Target}/${which} 1>&2
+        [[ -f ${which} ]] && [[ -r ${which} ]] && echo  ${Target}/${which} && NotFound=0 && [[ -z ${MatchAll} ]] && exit 0
+#    echo ${Target}/${which} not found 1>&2
+      done
+    done
+  done
+  cd ${CurrentDir}
+done
+exit $NotFound

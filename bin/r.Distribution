@@ -1,0 +1,32 @@
+#!/bin/ksh
+#
+# output of this script is the distribution name (as best as it knows)
+#
+if [[ "`uname  -s`" = Linux ]]
+then
+ grep -q =precise 2>/dev/null /etc/lsb-release && echo UBUNTU_12.04 && exit 0
+ grep -q =trusty 2>/dev/null /etc/lsb-release && echo UBUNTU_14.04 && exit 0
+ grep -q =xenial 2>/dev/null /etc/lsb-release && echo UBUNTU_14.04 && exit 0
+# grep -q =xenial 2>/dev/null /etc/lsb-release && echo UBUNTU_16.04 && exit 0
+ grep -q Ubuntu 2>/dev/null /etc/lsb-release && echo UBUNTU_14.04 && exit 0
+ grep -q VERSION /etc/SuSE-release 2>/dev/null && ( grep VERSION /etc/SuSE-release | sed 's/.* /SUSE/' ) && exit 0
+ grep -qi 'shrike' /etc/redhat-release 2>/dev/null && echo RH9 && exit 0
+ grep -qi '3[.]0' /etc/debian_version 2>/dev/null && echo woody && exit 0
+ grep -qi '3[.]1' /etc/debian_version 2>/dev/null && echo sarge && exit 0
+ grep -qi '4[.]0' /etc/debian_version 2>/dev/null && echo etch && exit 0
+# grep -qi 'squeeze/sid' /etc/debian_version 2>/dev/null && echo karmic && exit 0
+ grep -qi 'squeeze/sid' /etc/debian_version 2>/dev/null && echo lucid && exit 0
+ test -r /etc/debian_version && echo debian && exit 0
+ grep -qi 'taroon' /etc/redhat-release 2>/dev/null && echo ES3 && exit 0
+ grep -qi 'nahant' /etc/redhat-release 2>/dev/null && echo ES4 && exit 0
+ grep -qi 'Tikanga' /etc/redhat-release 2>/dev/null && echo ES5 && exit 0
+ grep -qi ' 6[.][0-9]' /etc/redhat-release 2>/dev/null && echo ES6 && exit 0
+ grep -qi ' 7[.][0-9]' /etc/redhat-release 2>/dev/null && echo ES7 && exit 0
+ grep -qi 'CentOS release 3' /etc/redhat-release 2>/dev/null && echo ES3 && exit 0
+ grep -qi 'CentOS release 4' /etc/redhat-release 2>/dev/null && echo ES4 && exit 0
+ grep -qi 'CentOS release 5' /etc/redhat-release 2>/dev/null && echo ES5 && exit 0
+ test -r /etc/redhat-release && echo redhat && exit 0
+ echo unknown
+else
+  echo "`uname  -s`"
+fi

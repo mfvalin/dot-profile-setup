@@ -1,0 +1,25 @@
+#!/bin/bash
+targets="`hostname`"
+[[ -n $PBS_NODEFILE ]] && targets="$(sort -u <$PBS_NODEFILE)"
+UserId="$(id -u $USER)"
+for target in ${targets}
+do
+  ssh $target ps -ef | grep -Ev "^(UID|rpc|dbus|ntp|smmsp|xfs|68|root|$USER|$UserId)" | grep '.*' >/dev/null && jobs_found="${jobs_found} $target"
+done
+#echo potential targets found on ${jobs_found}
+[[ -z $jobs_found ]] && exit 0
+[[ -z $JOB_ID ]] && exit 0
+((TotalCpus=${OMP_NUM_THREAD:-1}*${BATCH_MPI_CPUS:-1}))
+((TotalCpus<12)) && exit 0
+
+for target in ${jobs_found}
+do
+  echo ===== $target =====
+  ssh $target ps -ef | grep -Ev "^(UID|rpc|nslcd|dbus|ntp|smmsp|xfs|68|root|$USER|$UserId)" | tee -a ${HOME}/ForeignUsersOnNode.LIST
+done
+echo "==============================================================================" >>${HOME}/ForeignUsersOnNode.LIST
+echo "DATE=`date`, USER=$USER, JOB_ID=$JOB_ID, CPUS=$TotalCpus : Other users found on node(s) $jobs_found" | \
+   tee -a ${HOME}/ForeignUsersOnNode.LIST | tee -a /sb/home/winger/ForeignUsersOnNode.GLOBAL_LIST
+echo "==============================================================================" >>${HOME}/ForeignUsersOnNode.LIST
+## JOB terminates if a node or more and other users found on node and argument 1 was  ABORT
+[[ "$1" ==  ABORT ]] && ((TotalCpus>11)) && canceljob_guillimin guillimin.clumeq.ca canceljob

@@ -1,0 +1,11 @@
+if [[ -d /clumeq/etc/profile.d ]]
+then
+#
+#  colosse only, needed to get colosse-info and grid engine commands
+#
+  for i in /clumeq/etc/profile.d/*.sh ; do
+    if [ -r "$i" ]; then
+        . $i
+    fi
+  done
+fi

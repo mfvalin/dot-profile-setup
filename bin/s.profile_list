@@ -1,0 +1,15 @@
+#!/bin/ksh
+Os=$(uname -s)
+Processor=$(uname -p) 2>/dev/null || true
+[[ $Os = Linux* ]] && Processor=$(uname -m)
+grep -q ${Processor} $HOME/.profile.d/NAMES.list 2>/dev/null 1>/dev/null && exit 0
+ClAsSlIsT="TRUE_HOST group3 group2 group1 group0 group user interactive XWindows ssh batch"
+for ClAsS in ${ClAsSlIsT}
+do
+  for TeMp in .${ClAsS}_profile 
+  do
+    echo "${TeMp}.${Os}	${TeMp}.${Processor}	${TeMp}.${Os}.${Processor}	${TeMp}.TRUE_HOST" >> $HOME/.profile.d/NAMES.list
+    sort -u $HOME/.profile.d/NAMES.list >$HOME/.profile.d/NAMES.list+
+    mv $HOME/.profile.d/NAMES.list+ $HOME/.profile.d/NAMES.list
+  done
+done

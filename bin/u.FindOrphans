@@ -1,0 +1,27 @@
+#!/bin/bash
+if [[ "$1" == -h || "$1" == --help ]]
+then
+  echo "USAGE: ${0##*/} [username/mine/all] [hostname] [showps]" 1>&2
+  echo "      arguments must be supplied in order"
+  echo "      for an argument to be processed, all previous arguments must be present"
+  exit 0
+fi
+Command=cat
+[[ -n $1 ]] && Command="ps -fu $1"
+[[ "$1" == mine ]] && Command="ps -fu $USER"
+[[ "$1" == all ]] && Command="ps -ef"
+[[ -n $2 ]] && Command="ssh $2 $Command"
+echo "Command=$Command" 1>&2
+if [[ "$3" == showps ]]
+then
+  eval "$Command" |  while read line ; do value=$(echo "$line"|awk '{print $3}') ; ((value==1)) && echo "$line" ; done
+else
+  eval "$Command" |  while read line ; do value=$(echo "$line"|awk '{print $3}') ; ((value==1)) && echo $(echo "$line"|awk '{print $2}') ; done | paste -s
+fi
+##exit 0
+##if [[ "$1" == mine ]]
+##then
+##  ps -fu $USER | while read line ; do value=$(echo "$line"|awk '{print $3}') ; ((value==1)) && echo "$line" ; done
+##else
+##  while read line ; do value=$(echo "$line"|awk '{print $3}') ; ((value==1)) && echo "$line" ; done
+##fi

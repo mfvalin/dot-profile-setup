@@ -1,0 +1,12 @@
+#!/bin/ksh
+command="${1:--list}"
+cd ${SEQ_HOME_EXP:-~/.ord_soumet.d/wrap}/jobinfo || { echo ERROR: job directory not found ; exit 1 ;}
+[[ "$command" = -f* ]] && ls -l && exit 0
+[[ "$command" = -l* ]] && ls -1 && exit 0
+if [[ "$command" = -del* ]] ; then
+  jobname="${2:-i_en_a_pas_de_meme}"
+  [[ -L "$jobname" ]] || { echo ERROR: job $jobname not found ; exit 1 ;}
+  set -- `readlink $jobname`
+  echo removing job $jobname from system $1
+  ssh -n $1 "bash -c '. /etc/profile ; gmjob $1 delete  $jobname'" && rm -f $jobname
+fi

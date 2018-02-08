@@ -1,0 +1,8 @@
+#!/bin/ksh
+# this is intended for systems not having the /usr/local/env soft link
+# it returns the path where /usr/local/env would be pointing if present
+# if the base architecture is not recognized, the scipt exits with an error code of 1
+[[ "$BASE_ARCH" == Linux ]] && printf /home/dormrb02/linux_local/env && exit 0
+[[ "$BASE_ARCH" == Linux_x86-64 ]] && printf /home/dormrb02/linux_local/env && exit 0
+[[ "$BASE_ARCH" == AIX* ]] && printf /home/dormrb02/ibmenv && exit 0
+exit 1

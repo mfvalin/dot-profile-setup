@@ -1,0 +1,9 @@
+#!/bin/ksh
+[[ "$1" = --help ||  "$1" = -h ]] && echo "usage: $0 [-base] [-data] [-local] [-scripts]  (default is -base)" && exit 0
+test "$1" = "-data" && echo ${0%/bin/s.unified_setup-cfg}/share/data && exit 0
+#Me=$(readlink -e $0)
+Me=$(true_path  $0)
+test "$1" = "-base" && echo ${Me%/bin/s.unified_setup-cfg} && exit 0
+test "$1" = "-local" && echo ${Me%/bin/s.unified_setup-cfg}/notshared && exit 0
+test "$1" = "-scripts" && Me=${Me%/bin/s.unified_setup-cfg} && echo ${Me%/*}/all/bin && exit 0
+echo ${Me%/bin/s.unified_setup-cfg} && exit 0

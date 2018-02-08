@@ -1,0 +1,36 @@
+#!/bin/ksh
+#
+# used by the .profile... family of setup 
+#
+echo cleaning up temporary directories
+if [ "$TMPBASE" != "" ]
+then
+  if [ "$ZZZPID" != "" ]
+  then
+    if [ -d $TMPBASE/$ZZZPID ]
+    then
+      if [ "$NO_MESSAGES" = "" ]
+      then
+      echo removing  TMPDIR = $TMPBASE/$ZZZPID
+      fi
+      /bin/rm -rf $TMPBASE/$ZZZPID
+    fi
+  else
+    echo ERROR: ZZZPID no longer defined
+  fi
+else
+  echo ERROR: TMPBASE no longer defined
+fi
+if [ "$HISTFILE" = "$HISTFILE_" ]
+then
+  /bin/rm -f $HISTFILE_
+fi
+test "$TRUE_HOST" != "" && \
+test "$ZZZPID" != "" && \
+test -d $HOME/big_tmp/$TRUE_HOST/$ZZZPID && \
+echo removing BIGTMPDIR=$HOME/big_tmp/$TRUE_HOST/$ZZZPID && \
+rm -rf $HOME/big_tmp/$TRUE_HOST/$ZZZPID
+test -d $HOME/bigtmp/$TRUE_HOST/$ZZZPID && \
+echo removing BIGTMPDIR=$HOME/bigtmp/$TRUE_HOST/$ZZZPID && \
+rm -rf $HOME/bigtmp/$TRUE_HOST/$ZZZPID
+exit 0

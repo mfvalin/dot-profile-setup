@@ -1,0 +1,16 @@
+#!/bin/bash
+#set -x
+#tty -s && echo ERROR: not in batch mode && exit 1
+mkdir -p $HOME/top_in_batch
+cd $HOME/top_in_batch || exit 1
+TopFile=$HOME/top_in_batch/$(hostname)_${JOB_ID:-${PBS_JOBID:-$$}}
+#watch -n 10 "top -b -n 1 -u $USER > $TopFile"
+touch $TopFile.out && chmod 644 $TopFile.out
+exec 2>>$TopFile.out 1>>$TopFile.out
+while true
+do
+  top -b -n 1 -u $USER > $TopFile.top
+  [[ -s $TopFile.cmd ]] && bash -x -c ". $TopFile.cmd"
+  rm -f $TopFile.cmd ; touch $TopFile.cmd ; chmod 700 $TopFile.cmd
+  sleep 10
+done

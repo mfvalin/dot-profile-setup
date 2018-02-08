@@ -1,0 +1,62 @@
+# usage : . package-config.dot
+# from the "packagename"-config scripts
+Me=$(true_path $0)
+Package=${Me%/bin/*}
+Domain=${Package%/*}
+Package=${Package##*/}
+Platform=${Package##*_}
+Version=${Package%_*}
+Version=${Version#*_}
+#echo Domain=$Domain, Package=$Package, Platform=$Platform, Version=$Version, PackageName=${Package%%_*} 1>&2
+NoFollow=""
+[[ "$1" ==  "--no-follow" ]] &&  NoFollow=true && shift
+case ${1:---help} in
+  --base)
+    printf "${Domain}/${Package} "
+    ;;
+  --platform)
+    printf "$Platform "
+    ;;
+  --version)
+    printf "$Version "
+    ;;
+  --domain)
+    printf "$Domain "
+    ;;
+  --lib | --bin | --src | --share | --include)
+    Answer=${Domain}/${Package}/${1#--}
+    Answer2="$( ls -A ${Answer} 2>/dev/null )"
+    [[ -n "${Answer2}" ]] && printf "$Answer "
+    ;;
+  --allitems)
+    Answer=$( (cd ${Domain}/${Package}; ls ) )
+    printf "$Answer "
+    ;;
+  --item=*)
+#    Answer=$( ls ${Domain}/${Package} | grep "${1#--item=}" )
+    Answer=$( cd ${Domain}/${Package} ; echo ${1#--item=}* )
+    for Target in  ${Answer} ; do  [[ -n "$( ls -A ${Domain}/${Package}/$Target 2>/dev/null )" ]] && printf "${Domain}/${Package}/$Target " ; done
+    ;;
+  --help | -h)
+    printf "Usage: ${0##*/} [--no-follow] --platform|--version|--domain|--lib|--bin|--src|--share|--include|--allitems|--base|--item=pattern\n" 1>&2
+    return
+    ;;
+  *)
+    printf "ERROR: unrecognized option $1\n" 1>&2
+    ${0} --help
+#    printf "Usage: ${0##*/} --platform|--version|--domain|--lib|--bin|--src|--share|--include|--allitems|--base|--item=pattern\n" 1>&2
+    exit 1
+    ;;
+esac
+true
+[[ -n $NoFollow ]] && return
+# NoFollow is false, call all config files having the same name
+# use "s.which -a" to resolve ambiguities
+Others="$( s.which -a ${0##*/} )"
+Argument="${1}"
+set -- $Others
+shift
+for Extra in $*
+do
+  $Extra --no-follow ${Argument}
+done

@@ -1,0 +1,101 @@
+#!/bin/ksh
+where=""
+Prefix=""
+Postfix=""
+MatchAll=""
+LocalArgs=1
+while [[ -n $LocalArgs ]]
+do
+	[[ -z $1 ]] && unset LocalArgs && break
+	case "$1" in
+	--allmatches* )
+		MatchAll="--allmatches"
+		;;
+	--prepath=* )
+		pre_where="${1##*=}"
+		;;
+	--postpath=* )
+		post_where="${1##*=}"
+		;;
+	--help|-h)
+		echo "usage: s.locate [--allmatches] [--prepath=..] [--postpath=...] \\" 1>&2
+		echo "         --obj | --lib[=shared|all|static|list of extensions] | --jar | --inc[=list of extensions] | --bin | --rule \\" 1>&2
+		echo "         list of items to look for" 1>&2
+		echo "" 1>&2
+		echo "        --lib=shared : only look for libxxx.so" 1>&2
+		echo "        --lib=all : any type of library (.so .a .a.fl)" 1>&2
+		echo "        --lib=static : only look for static libraries (.a.fl .a)" 1>&2
+		echo "ex   : '--inc=.hf .inc .fh'  --lib='.a.fl .a .so .so.*' " 1>&2
+		echo "note : one and only one of --obj --lib --jar --inc --bin --rule must be specified" 1>&2
+		echo "       and must be the LAST options used" 1>&2
+		exit 1
+		;;
+	--lib=* )
+		Prefix=lib
+		Postfix="${1##*=}"
+		[[ "$Postfix" = "all" ]] && Postfix=".so .a.fl .a"
+		[[ "$Postfix" = "static" ]] && Postfix=".a.fl .a"
+		[[ "$Postfix" = "shared" ]] && Postfix=".so"
+		where="${LIBRARIES_PATH}  ${EC_LD_LIBRARY_PATH}"
+         	unset LocalArgs
+		;;
+	--lib )
+		Prefix=lib
+		Postfix=".so .a"
+		where="${LIBRARIES_PATH}  ${EC_LD_LIBRARY_PATH}"
+         	unset LocalArgs
+		;;
+	--jar )
+		Prefix=""
+		Postfix=".jar"
+		where="${EC_LD_LIBRARY_PATH}"
+         	unset LocalArgs
+		;;
+	--obj )
+		Prefix=""
+		Postfix=".o"
+		where="${EC_LD_LIBRARY_PATH}"
+         	unset LocalArgs
+		;;
+	--inc=* )
+		Prefix=""
+		Postfix="${1##*=}"
+		where="${EC_INCLUDE_PATH}"
+         	unset LocalArgs
+		;;
+	--inc )
+		Prefix=""
+		Postfix=".h .fh .hf .inc .mod"
+		where="${EC_INCLUDE_PATH}"
+         	unset LocalArgs
+		;;
+	--rule )
+		Prefix=""
+		Postfix=""
+		where=""
+         	unset LocalArgs
+		;;
+	--bin )
+		Prefix=""
+		Postfix=""
+		where="${PATH}"
+         	unset LocalArgs
+		;;
+        -* )
+                echo "ERROR: bad option specified : '$1'" 1>&2
+                set NIL --help
+                ;;
+	esac
+        shift
+done
+#echo where=${pre_where} ${where} ${post_where}
+#echo what="$@"
+[[ -z ${pre_where}${where}${post_where} ]] && echo ERROR: no place to look into 1>&2 && exit 1
+[[ -z ${1} ]]                              && echo ERROR: no item to look for 1>&2 && exit 1
+Found=1
+for Target in "$@"
+do
+#  echo "s.locate_item --prefix=${Prefix} "--postfix=${Postfix}" ${Target} ${where}"
+  s.locate_item ${MatchAll} --prefix=${Prefix} "--postfix=${Postfix}" "${Target}" ${pre_where} ${where} ${post_where} && Found=0
+done
+exit $Found

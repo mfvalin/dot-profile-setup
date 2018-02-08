@@ -1,0 +1,7 @@
+#!/bin/bash
+if [[ $SHELL = *bash ]]
+then
+  [[ -f $HOME/.bashrc ]] && s.echo -v 1 "WARNING: $HOME/.bashrc detected (may cause problems with $SHELL login shell)"
+  [[ -f $HOME/.bash_profile ]] && s.echo -v 1 "WARNING: $HOME/.bash_profile detected (may cause problems with $SHELL login shell)"
+  [[ -f $HOME/.bash_login ]] && s.echo -v 1 "WARNING: $HOME/.bash_login detected (may cause problems with $SHELL login shell)"
+fi

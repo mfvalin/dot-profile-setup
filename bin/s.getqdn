@@ -1,0 +1,25 @@
+#!/bin/ksh
+#
+# get a reasonable approximation of the local domain name
+# xxx.cmc.ec.gc.ca will show as cmc.ec.gc.ca
+# if a search line is present in /etc/resolv.conf the first entry is used
+# otherwise the nameserver lines are analysed , the first non 127.0.0.1 entry is used
+#
+unset fqdn
+grep -q search /etc/resolv.conf && fqdn=`grep search /etc/resolv.conf | head -1 | sed -e 's/[^	 ]*[	 ]*//' -e 's/[	 ].*//'`
+[[ "${fqdn%.}" = *cmc.ec.gc.ca ]] &&  echo "cmc.ec.gc.ca" && exit 0
+test -n "$fqdn" && echo ${fqdn%.} && exit 0
+
+nameserver=`grep nameserver /etc/resolv.conf | grep -v 127.0.0.1 | head -1 | sed 's/.*[	 ]//'`
+OS=`uname -s`
+case $OS in
+Linux)    host $nameserver | grep -qv '^Address:' && fqdn=`host $nameserver | sed 's/.* //'` ;
+          host $nameserver | grep -q '^Name:' && fqdn=`host $nameserver | grep  '^Name:' | sed 's/.* //'` ;
+          ;;
+AIX)      fqdn=`host $nameserver | sed 's/ .*//'` ;;
+IRIX64)   fqdn=`host $nameserver | sed -e 's/.* //' -e 's/[.]$//'` ;;
+*)        fqdn=`unknown.unknown`;;
+esac
+fqdn=${fqdn%.}
+[[ "${fqdn}" = *cmc.ec.gc.ca ]] &&  echo "cmc.ec.gc.ca" && exit 0
+echo ${fqdn#*.}

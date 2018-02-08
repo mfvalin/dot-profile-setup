@@ -1,0 +1,33 @@
+export HOME_ECssm=/home/valin/ssm-domains-base/setup/env_003
+echo "==== Unified Environment .profile - $(date) HOME_ECssm=${HOME_ECssm} ==="
+umask 022
+if [[ "$SETUP_DONE" != "1" ]]
+then
+#  [[ -n $BASH_VERSION ]] && [[ -r /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash ]] && source /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS:-1}
+  # use one history file per system for bash shell
+  [[ -n $BASH_VERSION ]] && TeMp=$(hostname) && [[ -f ${HOME}/.bash_history.local ]] && export HISTFILE=${HOME}/.bash_history.${TeMp%%.*}
+  # find basic domain
+  test -d /home/ordenv/ssm-domains/ssm-setup && export SSMUSERDOMAINHOME=/home/ordenv/ssm-domains/ssm-setup
+  test -d ${HOME}/ECssm && export SSMUSERDOMAINHOME=${HOME}/ECssm
+  test -d ${HOME}/my_ssm_domains/ssm-setup && export SSMUSERDOMAINHOME=${HOME}/my_ssm_domains/ssm-setup
+  [[ -n ${HOME_ECssm} ]] && export SSMUSERDOMAINHOME=${HOME_ECssm} && echo "INFO: using setup domain ${HOME_ECssm}"
+
+#  export SSM_OLD_STYLE=y
+  export SSMDOMAINHOME=${SSMUSERDOMAINHOME}
+  export SSM_DOMAIN_HOME=${SSMUSERDOMAINHOME}
+  if [ -r "${SSMDOMAINHOME}/etc/ssm.d/profile" ]; then
+    . "${SSMDOMAINHOME}/etc/ssm.d/profile"
+  else
+    echo ERROR: cannot find ${SSMDOMAINHOME}/etc/ssm.d/profile
+    echo        SETUP will not be done properly
+  fi
+  export SSMDOMAINHOME=$(true_path $SSMDOMAINHOME)
+  export SSMUSERDOMAINHOME=$(true_path $SSMUSERDOMAINHOME)
+  export SSM_DOMAIN_HOME=$(true_path $SSM_DOMAIN_HOME)
+  echo "=== Unified Environment BASE SETUP using `true_path ${SSMUSERDOMAINHOME}` - $(date) ==="
+else
+
+  echo "SETUP already done, will not redo"
+
+fi

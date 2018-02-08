@@ -1,0 +1,16 @@
+# add special classes of .profile files to initial setup
+# . .profile_extras --class list of names
+# . .profile_extras --class all   (to add the normal interactive setup) (intended for .batch_profile usage)
+if [[ "$1" == --class ]]
+then
+  shift
+  [[ "$1" == all ]] && set -- group3 group2 group1 group0 group ${TRUE_HOST} user
+  for ClAsS in "$@"
+  do
+    for TeMp in $(r.choose_architecture ${HOME}/.profile.d/.${ClAsS}_profile)
+    do
+      s.echo -v 2 === sourcing $TeMp ===
+      . $TeMp
+    done
+  done
+fi

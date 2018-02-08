@@ -1,0 +1,65 @@
+#!/bin/ksh
+if [[ "$1" = --h* || "$1" = -h* ]] ; then
+  echo 'usage eval `s.qad-parse [--prefix=xxx] arguments`' 1>&2
+  echo "example:"
+  set -x
+  s.qad-parse --prefix=arg_ 1 2  -a a -b -a s -b -c c v n -c -- cv -cv -cv nn
+  set +x
+  eval `s.qad-parse --prefix=arg_ 1 2  -a a -b -a s -b -c c v n -c -- cv -cv -cv nn`
+  echo ""
+  echo after 'eval ` ..... `'
+  echo ""
+  echo 'set | grep arg_'
+  set | grep arg_
+  echo ""
+  echo 'echo "positional arguments=$@"'
+  echo "positional arguments=$@"
+  exit 0
+fi
+Prefix=""
+CurrentName="Positional"
+Positional=""
+Done=""
+NameList=""
+for i in "$@"
+do
+ if [[  "${Done}" = "" ]] ; then
+   case $i in
+   --prefix=* )
+          [[ "${CurrentName}" = "Positional" ]] && [[ "${Prefix}" = "" ]] && Prefix=${i#*=}
+          ;;
+   -- )
+          Done="YES"
+          CurrentName="Positional"
+          ;;
+   - )
+          echo "ignoring single  -" 1>&2
+          ;;
+   +(-)[a-zA-Z]+([_a-zA-Z0-9])=* | +(-)[a-zA-Z]=* )
+          CurrentName=${i##*-}
+	  CurrentName=${CurrentName%%=*}
+	  echo " ${NameList} " | grep -qv ${CurrentName} && \
+	  NameList="${NameList} ${CurrentName}" && \
+	  echo "${Prefix}${CurrentName}=\"\${${Prefix}${CurrentName}:- }\";"
+	  echo "${Prefix}${CurrentName}=\"\$${Prefix}${CurrentName} ${i#*=}\";"
+          ;;
+   +(-)[a-zA-Z]+([_a-zA-Z0-9]) | +(-)[a-zA-Z] )
+          CurrentName=${i##*-}
+          echo " ${NameList} " | grep -qv ${CurrentName} && \
+          NameList="${NameList} ${CurrentName}" && \
+          echo "${Prefix}${CurrentName}=\"\${${Prefix}${CurrentName}:- }\";"
+          ;;
+   * )
+          if [[ "${CurrentName}" = "Positional" ]] ; then
+            Positional="${Positional} ${i}"
+          else
+            echo "${Prefix}${CurrentName}=\"\$${Prefix}${CurrentName} ${i}\";"
+          fi
+          ;;
+   esac
+ else
+   Positional="${Positional} ${i}"
+ fi
+done
+echo "${Prefix}NameList=\"${NameList}\";"
+echo set -- ${Positional}

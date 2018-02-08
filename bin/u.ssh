@@ -1,0 +1,12 @@
+#!/bin/bash
+local=$(echo -- "$@"  | grep " localhost ")
+if [[ -n "$local" ]]
+then
+  while [[ "$1" != localhost ]] ; do shift ; done
+  shift
+  echo NO ssh used to localhost 1>&2
+  "$@"
+else
+  echo using /usr/bin/ssh 1>&2
+  /usr/bin/ssh "$@"
+fi

@@ -1,0 +1,13 @@
+[[ -d "$1" ]] || return
+[[ $1 == *tmpdir ]] || return
+TMPBASE_=$(true_path $1)/$(hostname)/$USER
+ZZZPID_=$$
+TMPDIR_=$TMPBASE_/$ZZZPID_
+mkdir -p $TMPDIR_
+[[ -d $TMPDIR_ ]] || return
+export TMPBASE=$TMPBASE_
+export ZZZPID=$ZZZPID_
+export TMPDIR=$TMPDIR_
+unset TMPBASE_ ZZZPID_ TMPDIR_
+trap 'trap "" 0 ; u.remove_tmpdir' SIGINT SIGQUIT 0
+echo TMPDIR moved to $TMPDIR

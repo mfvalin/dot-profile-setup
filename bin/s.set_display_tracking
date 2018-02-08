@@ -1,0 +1,10 @@
+#!/bin/ksh
+[[ "$1" == -h || "$1" == --help ]] && cat <<true && exit 0
+# put DISPLAY in suitable remote form and copy to $HOME/.LOGIN_DISPLAY
+# usage: eval \`s.set_display_tracking\`    (change, set, store)
+#        .  s.set_display_tracking        (change, set, store)
+#        s.set_display_tracking           (change, store)
+true
+[[ "$DISPLAY" = :* ]] && echo changing DISPLAY from $DISPLAY to `hostname`$DISPLAY  and storing it into $HOME/.LOGIN_DISPLAY 1>&2 && export DISPLAY=`hostname`$DISPLAY
+echo $DISPLAY > $HOME/.LOGIN_DISPLAY
+echo DISPLAY=$DISPLAY

@@ -1,0 +1,2 @@
+Platform=`uname -s` ; [[ $Platform = Linux ]] && Platform=${Platform}-`uname -m`
+PATH=/home/valin/ssm-domains-base/setup/env_003/dot-profile-setup_2.0_multi/hostbin/${Platform}:${PATH}

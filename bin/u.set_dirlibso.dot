@@ -1,0 +1,11 @@
+[[ -z ${DirLibso} ]] && echo ERROR: environment variable DirLibso not defined && return
+[[ -n ${OLD_LD_LIBRARY_PATH} ]] && echo ERROR: OLD_LD_LIBRARY_PATH exists && return
+for Directory in $(echo ${LD_LIBRARY_PATH} | tr ':' ' ')
+do
+  for Target in $( echo ${Directory}/*.so* )
+  do
+    [[ -r ${Target} ]] && ln -s ${Target} ${DirLibso}/ 2>/dev/null
+  done
+done 
+export OLD_LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${DirLibso}"

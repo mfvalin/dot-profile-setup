@@ -1,0 +1,5 @@
+[[ -n ${DirLibso} ]] && echo INFO: DirLibso = ${DirLibso} will be used && return
+export DirLibso=${HOME}/DirLibso/$(hostname)/${ZZZPID}
+mkdir -p ${DirLibso} 2>/dev/null
+[[ -d ${DirLibso} ]] || { echo ERROR: cannot create ${DirLibso} ; unset DirLibso ; return ; }
+echo INFO: DirLibso = ${DirLibso} created

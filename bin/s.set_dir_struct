@@ -1,0 +1,41 @@
+#!/bin/bash
+[[ -z $1 ]] && set -- --help
+Destination="$(pwd)"
+while test "$1"
+do
+   case $1 in
+   --help | -h )
+          printf "USAGE: ${0##*/} [--bin] [--lib] [--include] [--share] [--all] [--dest=some_path] [--quiet|-q] [--silent|-qq]\n" 1>&2
+          printf "       generate standard lib/bin/include/share multi-architecture subtree(s) in current directory\n"  1>&2
+          exit
+          ;;
+   --bin | --lib | --share | --include )
+          Targets="$Targets ${1#--}"
+          shift
+          ;;
+   --all )
+          Targets="lib bin include share"
+          shift
+	  ;;
+   --quiet | -q )
+          exec 1>/dev/null
+          shift
+	  ;;
+   --silent | -qq )
+          exec 1>/dev/null 2>/dev/null
+          shift
+	  ;;
+   --dest=* )
+          Destination="${1#--dest=}"
+          shift
+	  ;;
+   * )
+          set -- --help
+	  ;;
+   esac
+done
+for Target in $Targets
+do
+  printf "Installing $Target subtree in $Destination\n" 1>&2
+  rsync -a -r -u -v -x -H $(r.unified_setup-cfg -base)/cfg/directory_structure/$Target $Destination
+done

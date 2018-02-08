@@ -1,0 +1,68 @@
+#!/bin/ksh
+if [[ ${0##*/} != s.use ]] ; then
+  echo s.use should be called and not sourced 
+  s.use "$@"
+  return $?
+fi
+function print_usage
+{
+  echo "USAGE: s.use product_and_version as alias"
+  echo "       s.use -d|--delete alias          (a quoted shell pattern is acceptable as alias)"
+  echo "       s.use -l|--list"
+  echo "Ex:    s.use r.mpirun_101 as r.mpirun   (create an alias)"
+  echo "       s.use --delete r.mpirun          (delete an alias)"
+  echo "       s.use --delete '*'               (delete all aliases)"
+  echo "       s.use --list                     (list aliases)"
+}
+# list all aliases and their targets
+if [[ "$1" = -l || "$1" = --list ]]
+then
+  cd $TMPDIR/bin
+  printf "%-15s   %s\n" "ALIAS" "TARGET"
+  for i in *
+  do
+    temp="" ; printf "%-15s : %s\n" $i "$(ls -l $i | sed -e 's/.*->.//')"
+  done
+  return 0
+fi
+# delete one or more aliases
+if [[ "$1" = -d || "$1" = --del* ]]
+then
+  cd $TMPDIR/bin || return 1
+  for i in $2
+  do
+    [[ -f "$i" ]] && rm -f "$i" && echo "INFO: suppressing s.use alias '${i##*/}'" && continue
+    echo "ERROR: alias '${i##*/}' not found" && return 1
+  done
+  return 0
+fi
+#
+UseTarget=$1
+UseAs=$2
+UseAlias=$3
+if [[ ( "$UseTarget" = "" ) || ( "$UseAs" != "as" ) || ( "$UseAlias" = "" ) ]]
+then
+  print_usage && return 0
+else
+  rm $TMPDIR/bin/${UseAlias##*/} 2>/dev/null && echo "INFO: suppressing previous alias '${UseAlias##*/}'"
+  if [[  -f $UseTarget ]]
+  then
+    UseTarget=$(true_path $UseTarget)
+    ln -s $UseTarget $TMPDIR/bin/${UseAlias##*/} && echo using  $UseTarget as ${UseAlias##*/}
+  else
+    for element in $(echo $PATH | sed 's/:/ /g')
+    do
+      if [[ "." != "$element" ]]
+      then
+        if [[ -f $element/$UseTarget ]]
+        then
+          ln -s $element/$UseTarget $TMPDIR/bin/${UseAlias##*/} && echo using  $element/$UseTarget as ${UseAlias##*/}
+          break
+        fi
+      fi
+    done
+  fi
+fi
+unset UseTarget || true
+unset UseAs || true
+unset UseAlias || true

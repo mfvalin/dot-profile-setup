@@ -1,0 +1,16 @@
+#!/bin/ksh
+#
+# this script is for internal use by the .profile_... components
+#
+Base=${1}
+Separator=${2:-.}
+Os=$(uname -s)
+Processor=$(uname -p) 2>/dev/null || true
+[[ $Os = Linux* ]] && Processor=$(uname -m)
+unset Reponse
+for TeMp in "" ${Separator}${Os} ${Separator}${Processor} ${Separator}${Os}${Separator}${Processor} ${Separator}${EC_ARCH} ${Separator}${TRUE_HOST}
+do
+#  echo testing :${Base}${TeMp}: 1>&2
+  test -r ${Base}${TeMp} && Reponse="${Reponse} ${Base}${TeMp}"
+done
+echo ${Reponse}

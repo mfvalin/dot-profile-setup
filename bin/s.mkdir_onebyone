@@ -1,0 +1,14 @@
+#!/bin/bash
+[[ "$1" = --help || "$1" = -h ]] && cat << true
+# s.mkdir_onebyone multi/level/directory/hierarchy
+# create a directory hierarchy one level at a time to avoid race conditions
+# when multiple processes/threads try to create possibly common levels
+true
+typeset TOPDIR
+[[ "$1" == /* ]] || TOPDIR=.
+for i in ${1//\// }
+do
+  TOPDIR="${TOPDIR}/${i}"
+  [[ -d ${TOPDIR} ]] || mkdir -p ${TOPDIR}
+  [[ -d ${TOPDIR} ]] || echo ERROR: creation of ${TOPDIR} failed
+done

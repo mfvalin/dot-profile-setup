@@ -1,0 +1,3 @@
+#!/bin/ksh
+. s.set_ec_arch.dot
+echo ${EC_ARCH}

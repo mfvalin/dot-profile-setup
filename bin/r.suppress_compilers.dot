@@ -1,0 +1,43 @@
+if [[ `uname -s` = "Linux" ]] ; then
+#
+# suppress PGI compilers if necessary
+#
+    if [[ "$PGI" != "" ]] ; then
+	echo INFO: suppressing ssm accessed PGI compilers
+	PGI="" ; unset PGI || true
+	FORCE_PGI="" ; unset FORCE_PGI || true
+	PGI_BASE="" ; unset PGI_BASE || true
+	PGI_SHARED="" ; unset PGI_SHARED || true
+        PATH=$(echo :${PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+        LD_LIBRARY_PATH=$(echo :${LD_LIBRARY_PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+        MANPATH=$(echo :${MANPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+        PYTHONPATH=$(echo :${PYTHONPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+        TCL_LIBRARY=$(echo :${TCL_LIBRARY}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+        LIBPATH=$(echo :${LIBPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-pgi[^:]*:/:/g' -e 's/::*/:/g' )
+    fi
+#
+# suppress SUN Studio compilers if necessary
+#
+    if [[ "$SUNS12_BASE" != "" ]] ; then
+	echo INFO: suppressing ssm accessed SUN Studio compilers
+	SUNS12_BASE="" ; unset SUNS12_BASE || true
+        PATH=$(echo :${PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+        LD_LIBRARY_PATH=$(echo :${LD_LIBRARY_PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+        MANPATH=$(echo :${MANPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+        PYTHONPATH=$(echo :${PYTHONPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+        TCL_LIBRARY=$(echo :${TCL_LIBRARY}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+        LIBPATH=$(echo :${LIBPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*ssm-sun[^:]*:/:/g' -e 's/::*/:/g' )
+    fi
+fi
+if [[ `uname -s` = "AIX" ]] ; then
+#
+# suppress ssm accessed XLF versions
+#
+  echo INFO: suppressing ssm accessed IBM XL compilers
+  PATH=$(echo :${PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*XLF[^:]*-64[^:]*:/:/g' -e 's/::*/:/g' )
+  LIBPATH=$(echo :${LIBPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*XLF[^:]*-64[^:]*:/:/g' -e 's/::*/:/g' )
+  LD_LIBRARY_PATH=$(echo :${LD_LIBRARY_PATH}: | sed -e 's/:/::/g' -e 's/:[^:]*XLF[^:]*-64[^:]*:/:/g' -e 's/::*/:/g' )
+  NLSPATH=$(echo :${NLSPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*XLF[^:]*-64[^:]*:/:/g' -e 's/::*/:/g' )
+  PYTHONPATH=$(echo :${PYTHONPATH}: | sed -e 's/:/::/g' -e 's/:[^:]*XLF[^:]*-64[^:]*:/:/g' -e 's/::*/:/g' )
+fi
+[[ -n $MANPATH ]] && MANPATH=${MANPATH}:

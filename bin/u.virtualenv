@@ -1,0 +1,36 @@
+#!/bin/bash
+Where=$(which python)
+Where=${Where%/bin/*}
+Where=$(true_path ${Where}/lib/*/site-packages)
+for last in "$@" ; do true; done  # get last argument (new virtual python directory)
+NewPython=$last
+virtualenv "$@"
+[[ -d ${NewPython} ]] || exit 0   # was probably --help
+#
+# new super activate script appends previous python sys.path to new virtual python
+#
+cat <<EOT >${NewPython}/bin/activate+
+export PYTHON_POST_PATH="\$(python -c 'import sys;print sys.path'  | tr "][, '" ' ' | sed 's/[ ][ ]*/ /g')"
+. ${NewPython}/bin/activate
+EOT
+chmod 644 ${NewPython}/bin/activate+
+echo "to activate: . ${NewPython}/bin/activate+  or . ${NewPython}/bin/activate"
+echo "patching ${NewPython}/lib/python2.7/site.py"
+#
+# this patch appends contents of environment variable PYTHON_POST_PATH to sys.path
+#
+cd ${NewPython}/lib/python2.7/ ; patch -p2 <<EOT
+--- lib/python2.7/site.py       2014-06-17 13:16:16.456068196 -0400
++++ site.py     2014-06-17 11:44:23.772240442 -0400
+@@ -686,6 +686,10 @@
+         paths_in_sys = virtual_addsitepackages(paths_in_sys)
+     if sys.platform == 'os2emx':
+         setBEGINLIBPATH()
++    extradirs=os.environ['PYTHON_POST_PATH']
++    for s in extradirs.split(' '):
++        if s != '':
++            sys.path.append(s)
+     setquit()
+     setcopyright()
+     sethelper()
+EOT

@@ -1,0 +1,15 @@
+export EC_ARCH=`uname -s`
+if [[ "$EC_ARCH" = Linux ]]
+then
+ ProcessorType=$(uname -m)
+ if [[ "$ProcessorType" != i*86 ]] ; then EC_ARCH=${EC_ARCH}_$( uname -m | sed 's/_/-/' ) ; fi
+fi
+#if [[ "$EC_ARCH" = AIX ]]
+#then
+#  [[ "`uname -M`" != "IBM,9118-575" ]] && EC_ARCH=AIX-powerpc7
+#fi
+export BASE_ARCH=$EC_ARCH
+test "$COMP_ARCH" != "" && EC_ARCH=${EC_ARCH}/${COMP_ARCH}
+test "$COMP_CFG" != "" && EC_ARCH=${EC_ARCH}/${COMP_CFG}
+export ARCH=$EC_ARCH
+unset ProcessorType || true

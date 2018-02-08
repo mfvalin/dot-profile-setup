@@ -1,0 +1,10 @@
+#!/bin/bash
+mkdir -p $HOME/simu_opt30_nompi
+cd $HOME/simu_opt30_nompi
+[[ -n "$BATCH_MPI_CPUS" ]] && . s.ssmuse.dot openmpi runtools
+echo 3300 1024 1 >nsteps
+which simu_opt30_nompi
+cp `which simu_opt30_nompi` .
+[[ -n "$BATCH_MPI_CPUS" ]] && set -x && r.mpirun -pgm ./simu_opt30_nompi && set +x
+[[ -z "$BATCH_MPI_CPUS" ]] && set -x && ./simu_opt30_nompi && set +x
+rm nsteps ./simu_opt30_nompi

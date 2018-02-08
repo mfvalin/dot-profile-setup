@@ -1,0 +1,12 @@
+#!/bin/ksh
+[[ "$1" == -h || "$1" == --help ]] && cat <<EOT && return
+# usage: s.log_access name [version]
+# ex:    s.log_access xrec 1.5.0
+# ex:    s.log_access xrec
+# ex:    s.log_access \$0 3.4.5b
+# ex:    s.log_access \$0
+EOT
+[[ -z $1 ]] && return
+mkdir -p /home/ordenv/LOGS/${USER} &&  chmod g+w,o-rx /home/ordenv/LOGS/${USER}
+[[ -n $2 ]] && touch /home/ordenv/LOGS/${USER}/${1##*/}_${2}_${TRUE_HOST} && return
+touch /home/ordenv/LOGS/${USER}/${1##*/}_${TRUE_HOST} && return
