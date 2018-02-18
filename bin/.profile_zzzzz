@@ -59,3 +59,4 @@ else
 fi
 [[ -r ${HOME}/ECssm/MOTD ]] && cat ${HOME}/ECssm/MOTD
 [[ -x ${HOME}/ECssm/MOTD.sh ]] && ${HOME}/ECssm/MOTD.sh
+true
