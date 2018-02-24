@@ -16,5 +16,5 @@ echo "PATH=${packageHome}/hostbin/\${Platform}:\${PATH}" >> ${profilePath}
 chmod 644 ${profilePath}
 cd ${packageHome}/src
 mkdir -p ../hostbin/${Platform}
-PLATFORM=${Platform} make
+make PLATFORM=${Platform}
 

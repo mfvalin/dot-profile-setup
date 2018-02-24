@@ -1,10 +1,15 @@
 BINDIR=../hostbin/$(PLATFORM)
 CCLARGS_VERSION=300
 
-all:	$(BINDIR)/cclargs $(BINDIR)/cclargs_lite $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION) \
+all:	$(BINDIR) $(BINDIR)/cclargs $(BINDIR)/cclargs_lite $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION) \
 	$(BINDIR)/cclargs $(BINDIR)/cclargs_lite+ \
 	$(BINDIR)/r.kill0 $(BINDIR)/r.read_link $(BINDIR)/r.seq $(BINDIR)/true_path \
-	$(BINDIR)/s.path_cleanup $(BINDIR)/s.get_nb_of_cpus $(BINDIR)/r.echo $(BINDIR)/repeat_command
+	$(BINDIR)/s.path_cleanup $(BINDIR)/s.get_nb_of_cpus $(BINDIR)/r.echo $(BINDIR)/repeat_command \
+	$(BINDIR)/arbre $(BINDIR)/grepdep $(BINDIR)/r.isowner \
+	$(BINDIR)/traffic $(BINDIR)/r.ucanrm $(BINDIR)/r.crc
+
+$(BINDIR):
+	mkdir -p ${BINDIR}
 
 $(BINDIR)/cclargs: $(BINDIR)/cclargs_lite
 	cp $(BINDIR)/cclargs_lite $(BINDIR)/cclargs
@@ -22,33 +27,60 @@ $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION): cclargs_lite.c progmenu.c
 	-strip $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION)
 
 $(BINDIR)/r.echo: r.echo.c
-	cc -o $(BINDIR)/r.echo r.echo.c
-	strip $(BINDIR)/r.echo
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/r.kill0: r.kill0.c
-	cc -o $(BINDIR)/r.kill0 r.kill0.c
-	strip $(BINDIR)/r.kill0
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/r.read_link: r.read_link.c
-	cc -o $(BINDIR)/r.read_link r.read_link.c
-	strip $(BINDIR)/r.read_link
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/r.seq: r.seq.c
-	cc -o $(BINDIR)/r.seq r.seq.c
-	strip $(BINDIR)/r.seq
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/repeat_command: repeat_command.c
-	cc -o $(BINDIR)/repeat_command repeat_command.c
-	strip $(BINDIR)/repeat_command
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/true_path: true_path.c
-	cc -o $(BINDIR)/true_path true_path.c
-	strip $(BINDIR)/true_path
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/s.path_cleanup: s.path_cleanup.c
-	cc -O -o $(BINDIR)/s.path_cleanup s.path_cleanup.c
-	strip $(BINDIR)/s.path_cleanup
+	cc -O -o $@ $<
+	strip $@
 
 $(BINDIR)/s.get_nb_of_cpus: s.get_nb_of_cpus.c
-	cc -O -o $(BINDIR)/s.get_nb_of_cpus s.get_nb_of_cpus.c
-	strip $(BINDIR)/s.get_nb_of_cpus
+	cc -O -o $@ $<
+	strip $@
+
+$(BINDIR)/arbre: arbre.c
+	cc -o $@ $<
+	strip $@
+
+$(BINDIR)/grepdep: grepdep.c
+	cc -o $@ $<
+	strip $@
+
+$(BINDIR)/r.isowner: r.isowner.c
+	cc -o $@ $<
+	strip $@
+
+$(BINDIR)/traffic: traffic.c
+	cc -o $@ $<
+	strip $@
+
+$(BINDIR)/r.ucanrm: r.ucanrm.c
+	cc -o $@ $<
+	strip $@
+
+$(BINDIR)/r.crc: r.crc.c
+	cc -o $@ $<
+	strip $@
+
+distclean:
+	rm -rf ../hostbin
