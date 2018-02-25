@@ -6,7 +6,7 @@ all:	$(BINDIR) $(BINDIR)/cclargs $(BINDIR)/cclargs_lite $(BINDIR)/cclargs_lite_c
 	$(BINDIR)/r.kill0 $(BINDIR)/r.read_link $(BINDIR)/r.seq $(BINDIR)/true_path \
 	$(BINDIR)/s.path_cleanup $(BINDIR)/s.get_nb_of_cpus $(BINDIR)/r.echo $(BINDIR)/repeat_command \
 	$(BINDIR)/arbre $(BINDIR)/grepdep $(BINDIR)/r.isowner \
-	$(BINDIR)/traffic $(BINDIR)/r.ucanrm $(BINDIR)/r.crc
+	$(BINDIR)/traffic $(BINDIR)/r.ucanrm $(BINDIR)/r.crc $(BINDIR)/r.basename
 
 $(BINDIR):
 	mkdir -p ${BINDIR}
@@ -25,6 +25,10 @@ $(BINDIR)/cclargs_lite+: cclargs_lite+.c
 $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION): cclargs_lite.c progmenu.c
 	-cc -o $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION) -DVERSION=$(CCLARGS_VERSION) cclargs_lite.c progmenu.c -lcurses
 	-strip $(BINDIR)/cclargs_lite_curses_$(CCLARGS_VERSION)
+
+$(BINDIR)/r.basename: r.basename.c
+	cc -o $@ $<
+	strip $@
 
 $(BINDIR)/r.echo: r.echo.c
 	cc -o $@ $<
