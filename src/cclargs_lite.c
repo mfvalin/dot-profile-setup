@@ -57,7 +57,12 @@ struct definition
     enum typecle type;
 };
 
-
+check_argv(char **argv){
+  if(*argv != NULL) return;
+  fprintf(stderr,"cclargs: FATAL ERROR, argument expected, NULL found\n");
+  exit(1);
+}
+
 main(argc, argv)
 int argc;
 char **argv;
@@ -83,36 +88,37 @@ char **argv;
 
   for(i = 0; i < NKLEMAX ; i++)
   {
-   defo[i].kle_nom=defo[i].kle_def1=defo[i].kle_def2=defo[i].kle_val=defo[i].kle_desc=NULL;
+   defo[i].kle_nom=NULL;
+   defo[i].kle_def1=defo[i].kle_def2=defo[i].kle_val=defo[i].kle_desc="";
   }
 
-  argv++;  /* on saute le nom du programme */
+  argv++ ; check_argv(argv);  /* on saute le nom du programme */
   if( ! strcmp(*argv,"-NOUI") )
   {
-     argv++;
+     argv++ ; check_argv(argv);
      UI=0;
   }
   if( ! strcmp(*argv,"-D") )
   {
-     argv++;
+     argv++ ; check_argv(argv);
      delimiter=**argv;
      fprintf(stderr,"Changing multi-value argument delimiter from : to %c\n",delimiter);
-     argv++;
+     argv++ ; check_argv(argv);
   }
   if( ! strcmp(*argv,"-python") )
   {
      interp=python;
-     argv++;
+     argv++ ; check_argv(argv);
   }
   if( ! strcmp(*argv,"-perl") )
   {
      interp=perl;
-     argv++;
+     argv++ ; check_argv(argv);
   }
   if(**argv != '-')
   {
       getnom(scriptnom,*argv,49);
-      argv++;
+      argv++ ; check_argv(argv);
   }
   else
   {
@@ -125,7 +131,7 @@ char **argv;
   if(! strcmp(*argv,"-+"))
   {
      on_affiche = 1;
-     argv++;
+     argv++ ; check_argv(argv);
   }
 
 /* 
@@ -133,10 +139,9 @@ char **argv;
 */
   if(**argv == '[')
   {
-      lng = strlen(*argv)-1;
-      *((*argv)+lng) = '\0';
-      strcpy(help_general,(*argv)+1);
-      argv++;
+      lng = strlen(*argv)-2;
+      strncpy(help_general,(*argv)+1,lng);
+      argv++ ; check_argv(argv);
   }
        
   /*  dresser la liste des arguments et leurs valeurs de defaut */
@@ -153,13 +158,13 @@ char **argv;
     {
       if(!strcmp(*pointeur,"--help"))
       {
-         sequence_appel(defo,scriptnom);
+         sequence_appel(defo,scriptnom,help_general);
          printf(" exit 0 ;");
          exit (0);
       }
       if(!strcmp(*pointeur,"-h"))
       {
-         sequence_appel(defo,scriptnom);
+         sequence_appel(defo,scriptnom,help_general);
          printf(" exit 0 ;");
          exit (0);
       }
@@ -199,7 +204,7 @@ if(interp== shell) {
   if(status !=0)
   {
           printf(" exit %d ",status);
-          sequence_appel(defo,scriptnom);
+          sequence_appel(defo,scriptnom,help_general);
           exit (status);
    }
 
@@ -346,8 +351,11 @@ int *status;
       {
         if(**argv == '[')   /*  descripteur pour help   */
         {
+           /* add extra blank to the end so there is no char trunc */
            ldesc = strlen(*argv) - 1 ;
-           defo[i].kle_desc = malloc(ldesc*sizeof(char));
+           defo[i].kle_desc = malloc((ldesc+1)*sizeof(char));
+           *((*argv)+ldesc) = ' ';
+           ldesc++;  
            *((*argv)+ldesc) = '\0';
            strcpy(defo[i].kle_desc,(*argv)+1);
         }
@@ -735,9 +743,10 @@ char *arg;
  *       imprimer sur stderr la sequence d'appel      *
  ******************************************************/
 
-void sequence_appel(defo,scriptnom)
+void sequence_appel(defo,scriptnom,help_general)
 struct definition defo[];
 char *scriptnom;
+char *help_general;
 
 /*   fonction servant a imprimer sur le fichier stderr la liste des
 *    noms de clefs et leurs valeurs de defaut
@@ -750,21 +759,24 @@ char *scriptnom;
 
 {
 
+     char *desc;
      int i = 0;
 
      
      fprintf(stderr,"\n *** SEQUENCE D'APPEL ***\n\n");
 
-     fprintf(stderr,"%s [positionnels]\n",scriptnom);
+     fprintf(stderr,"%s [positionnels] %s\n",scriptnom,help_general);
    
      while(defo[i].kle_nom != '\0')
      {
+       desc = defo[i].kle_desc ? defo[i].kle_desc : "";
        if(*defo[i].kle_nom == '_') /* supprimer le _ au debut des cles de sortie */
-        fprintf(stderr," IN/OUT   -%s [%s:%s]\n",defo[i].kle_nom+1,defo[i].kle_def1,defo[i].kle_def2);
+        fprintf(stderr," IN/OUT   -%s [%s:%s] %s\n",defo[i].kle_nom+1,defo[i].kle_def1,defo[i].kle_def2, desc);
        else
-        fprintf(stderr," IN       -%s [%s:%s]\n",defo[i].kle_nom,defo[i].kle_def1,defo[i].kle_def2);
+        fprintf(stderr," IN       -%s [%s:%s] %s\n",defo[i].kle_nom,defo[i].kle_def1,defo[i].kle_def2, desc);
          i++;
      }
+
      fprintf(stderr,"          [-- positionnels]\n");
      fprintf(stderr,"\n");
 }
