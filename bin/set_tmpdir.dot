@@ -1,11 +1,13 @@
 export ZZZPID=$$
-export TMPBASE=/tmp/$LOGNAME
+HOSTAME=$(hostname)
+export TMPBASE=/tmp/$LOGNAME-${HOSTAME%%.*}
 for base in /localscratch ${LSCRATCH}/ /data/local/tmpdirs/$LOGNAME ${SCRATCH} ${SLURM_TMPDIR} $HOME/tmp/$TRUE_HOST $HOME/tmp/$HOST
 do
   [[ -d $base ]] || continue
-  [[ -d $base ]] && mkdir -p $base/$LOGNAME 2> /dev/null
-  if [[ -d $base/$LOGNAME ]] ; then export TMPBASE=$(readlink -e ${base}/$LOGNAME) ; fi
+  [[ -d $base ]] && mkdir -p $base/$LOGNAME-${HOSTAME%%.*} 2> /dev/null
+  if [[ -d $base/$LOGNAME-${HOSTAME%%.*} ]] ; then export TMPBASE=$(readlink -e ${base}/$LOGNAME-${HOSTAME%%.*}) ; fi
 done
+echo === TMPBASE = $TMPBASE ===
 export TMPDIR=$TMPBASE/$ZZZPID
 mkdir -p $TMPBASE 2> /dev/null
 mkdir -p $TMPDIR 2> /dev/null
