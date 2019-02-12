@@ -38,7 +38,7 @@ then
   # setup to clear TMPDIRs at exit
   trap "r.cleanup_tmpdir" EXIT
 
-  export ORDENV_PLAT=linux26-$(uname -m | tee '_' '-')
+  export ORDENV_PLAT=linux26-$(uname -m | tr '_' '-')
 else
 
   [[ -z "${ARMNLIB}${AFSISIO}" ]] && s.echo -v 5 "SETUP already done, will not redo"
