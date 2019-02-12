@@ -1,7 +1,7 @@
 if [[ "$SETUP_DONE" != "1" ]]
 then
 #  [[ -n $BASH_VERSION ]] && [[ -r /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash ]] && source /unique/armnssm/MODULES/Modules-tcl/3.2.10/init/bash
-  export ORDENV_PLAT=linux26-x86-64
+  export ORDENV_PLAT=linux26-$(uname -m | tr '_' '-')
   [[ -n $BASH_VERSION ]] && [[ ! -f $HOME/.lmod ]] && [[ -f $HOME/.tmod ]] && \
     [[ -r /unique/armnssm/MODULES/Modules-C/Modules/3.2.10/init/bash ]] && \
     source /unique/armnssm/MODULES/Modules-C/Modules/3.2.10/init/bash
